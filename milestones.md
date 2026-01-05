@@ -360,7 +360,7 @@ rhp-analyzer/
 **Verification:**
 - `.venv` folder exists
 - `pip list` shows installed packages
-- `python --version` confirms 3.10
+- `python --version` confirms 3.12
 
 ---
 
@@ -785,23 +785,23 @@ from pdf2image import convert_from_path
 
 class OCRProcessor:
     """OCR for scanned/image-based PDF pages"""
-    
+
     def __init__(self, languages: str = "eng+hin"):
         self.languages = languages
         pytesseract.pytesseract.tesseract_cmd = self._find_tesseract()
-    
+
     def is_scanned_page(self, page) -> bool:
         """Detect if page is scanned (low text, high images)"""
         pass
-    
+
     def extract_text_ocr(self, page_image) -> str:
         """Apply OCR to page image"""
         return pytesseract.image_to_string(
-            page_image, 
+            page_image,
             lang=self.languages,
             config='--psm 6'  # Assume uniform block of text
         )
-    
+
     def process_scanned_pdf(self, pdf_path: str, page_numbers: List[int]) -> Dict[int, str]:
         """Process specific scanned pages"""
         images = convert_from_path(pdf_path, first_page=min(page_numbers), last_page=max(page_numbers))
@@ -1218,11 +1218,11 @@ class FinancialParser:
     """
     def __init__(self, table_extractor):
         self.table_extractor = table_extractor
-    
+
     def parse_financial_statements(self, tables: List[Table]) -> List[FinancialMetrics]:
         """Parse P&L, Balance Sheet, Cash Flow into structured metrics"""
         pass
-    
+
     def calculate_ratios(self, metrics: FinancialMetrics) -> Dict[str, float]:
         """Calculate key financial ratios"""
         return {
@@ -1233,7 +1233,7 @@ class FinancialParser:
             'ebitda_margin': (metrics.ebitda / metrics.revenue * 100) if metrics.revenue else 0,
             'pat_margin': (metrics.pat / metrics.revenue * 100) if metrics.revenue else 0,
         }
-    
+
     def detect_divergences(self, metrics_list: List[FinancialMetrics]) -> List[str]:
         """
         Identify 'Window Dressing' signals:
@@ -1245,32 +1245,32 @@ class FinancialParser:
         for i in range(1, len(metrics_list)):
             current = metrics_list[i]
             prior = metrics_list[i-1]
-            
+
             # Channel stuffing check
             revenue_growth = (current.revenue / prior.revenue - 1) * 100 if prior.revenue else 0
             receivable_growth = (current.trade_receivables / prior.trade_receivables - 1) * 100 if prior.trade_receivables else 0
-            
+
             if receivable_growth > revenue_growth + 10:
                 warnings.append(f"{current.fiscal_year}: Receivables growing {receivable_growth:.1f}% vs Revenue {revenue_growth:.1f}% - CHANNEL STUFFING RISK")
-            
+
             # Paper profits check
             if current.ebitda > 0 and current.cfo / current.ebitda < 0.5:
                 warnings.append(f"{current.fiscal_year}: CFO/EBITDA = {current.cfo/current.ebitda:.1%} - PAPER PROFITS RISK")
-        
+
         return warnings
-    
+
     def detect_trends(self, metrics_list: List[FinancialMetrics]) -> Dict[str, str]:
         """Identify growth trends and anomalies"""
         if len(metrics_list) < 2:
             return {}
-        
+
         # Calculate CAGRs
         years = len(metrics_list) - 1
         first, last = metrics_list[0], metrics_list[-1]
-        
+
         revenue_cagr = ((last.revenue / first.revenue) ** (1/years) - 1) * 100 if first.revenue else 0
         pat_cagr = ((last.pat / first.pat) ** (1/years) - 1) * 100 if first.pat > 0 else 0
-        
+
         return {
             'revenue_cagr': f"{revenue_cagr:.1f}%",
             'pat_cagr': f"{pat_cagr:.1f}%",
@@ -1815,7 +1815,7 @@ class GovernanceRulebook:
     """SEBI-aligned rule engine for governance red flags"""
     def __init__(self, rules_yaml_path: str):
         self.rules = self._load_rules(rules_yaml_path)
-    
+
     def evaluate_rules(self, state) -> List[RuleViolation]:
         pass
 ```
@@ -2311,7 +2311,7 @@ class ValuationNormalization:
 - Feed findings to Governance, Forensic, and Red Flag agents
 
 **Rule families (configurable):**
-- **Shareholder Skin-in-the-Game**: 
+- **Shareholder Skin-in-the-Game**:
   - Promoter post-issue <51% → Critical alert
   - OFS > Fresh Issue → Major alert
 - **Pledge & Encumbrance**:
@@ -2340,7 +2340,7 @@ class GovernanceRulebook:
     """SEBI-aligned rule engine for governance red flags"""
     def __init__(self, rules_yaml_path: str):
         self.rules = self._load_rules(rules_yaml_path)
-    
+
     def evaluate_rules(self, state) -> List[RuleViolation]:
         pass
 ```
@@ -2419,13 +2419,13 @@ class CitationManager:
     """Manage audit trail for all sourced claims"""
     def __init__(self):
         self.citations = {}
-    
+
     def add_citation(self, claim_id: str, section: str, page: int, snippet: str):
         pass
-    
+
     def validate_claim(self, claim_id: str) -> bool:
         pass
-    
+
     def generate_footnotes(self) -> str:
         pass
 ```
@@ -2471,7 +2471,7 @@ class CitationManager:
 class WorkingCapitalAnalyzer:
     """Analyze working capital with sector benchmarks"""
     SECTOR_BENCHMARKS = {...}
-    
+
     def analyze(self, financials, sector) -> List[WorkingCapitalAnalysis]:
         pass
 ```
@@ -2765,12 +2765,12 @@ class LocalSummarizer:
         self.fallback_to_api = fallback_to_api
         self.ollama_model = "llama3.2:8b-instruct-fp16"
         self.hf_model = "meta-llama/Llama-3.2-8B-Instruct"
-        
+
         if use_ollama:
             self._init_ollama()
         else:
             self._init_transformers()
-    
+
     def _init_ollama(self):
         """Initialize Ollama client"""
         try:
@@ -2782,13 +2782,13 @@ class LocalSummarizer:
         except Exception as e:
             print(f"Ollama not available: {e}. Will use fallback.")
             self.is_available = False
-    
+
     def _init_transformers(self):
         """Initialize transformers pipeline (requires GPU)"""
         try:
             from transformers import pipeline
             import torch
-            
+
             device = "cuda" if torch.cuda.is_available() else "cpu"
             self.pipeline = pipeline(
                 "text-generation",
@@ -2800,7 +2800,7 @@ class LocalSummarizer:
         except Exception as e:
             print(f"Transformers not available: {e}. Will use API fallback.")
             self.is_available = False
-    
+
     def summarize(self, text: str, max_words: int = 150) -> str:
         """
         Summarize text using local model.
@@ -2813,7 +2813,7 @@ Text:
 {text}
 
 Summary:"""
-        
+
         if self.use_ollama and self.is_available:
             return self._summarize_ollama(prompt)
         elif hasattr(self, 'pipeline') and self.is_available:
@@ -2822,7 +2822,7 @@ Summary:"""
             return self._summarize_api(prompt)
         else:
             raise RuntimeError("No summarization backend available")
-    
+
     def _summarize_ollama(self, prompt: str) -> str:
         """Use Ollama for summarization"""
         response = self.client.generate(
@@ -2834,7 +2834,7 @@ Summary:"""
             }
         )
         return response['response'].strip()
-    
+
     def _summarize_transformers(self, prompt: str) -> str:
         """Use local transformers for summarization"""
         result = self.pipeline(
@@ -2844,7 +2844,7 @@ Summary:"""
             do_sample=True
         )
         return result[0]['generated_text'].split("Summary:")[-1].strip()
-    
+
     def _summarize_api(self, prompt: str) -> str:
         """Fallback to HuggingFace API"""
         from huggingface_hub import InferenceClient
@@ -2856,7 +2856,7 @@ Summary:"""
             temperature=0.3
         )
         return response.strip()
-    
+
     def batch_summarize(self, texts: list, max_words: int = 150) -> list:
         """Summarize multiple texts efficiently"""
         return [self.summarize(text, max_words) for text in texts]
@@ -3067,23 +3067,23 @@ class AgentOutput:
    - Verify all mandatory RHP sections present
    - Flag missing or incomplete sections
    - Check for proper restated financial statements
-   
+
 2. **Section Quality Assessment:**
    - Rate each section's disclosure quality (Excellent/Good/Poor)
    - Identify sections with unusually brief disclosures
    - Flag boilerplate vs substantive content
-   
+
 3. **Complexity Rating:**
    - Business complexity (simple/moderate/complex)
    - Corporate structure complexity (single entity vs group)
    - Transaction complexity (fresh issue vs OFS-heavy)
-   
+
 4. **Key Metrics Identification:**
    - Extract issue size, price band, market cap
    - Identify company sector and relevant benchmarks
    - Extract promoter holding % (pre and post)
    - Flag if SME or Mainboard IPO
-   
+
 5. **Agent Relevance Mapping:**
    - Enable/disable Order Book Agent (only for B2B/EPC/Defense)
    - Adjust forensic focus based on sector
@@ -3124,23 +3124,23 @@ class ArchitectAgent(BaseAgent):
     def analyze(self, state: AnalysisState) -> AgentAnalysis:
         # 1. Analyze document structure
         section_coverage = self._check_section_completeness(state)
-        
+
         # 2. Determine company profile
         company_profile = self._extract_company_profile(state)
-        
+
         # 3. Create analysis plan
         analysis_plan = self._create_analysis_plan(section_coverage, company_profile)
-        
+
         # 4. Determine agent relevance
         agent_config = self._determine_agent_relevance(company_profile)
-        
+
         # Store in state for downstream agents
         state['analysis_plan'] = analysis_plan
         state['agent_config'] = agent_config
         state['company_profile'] = company_profile
-        
+
         return self._create_analysis_output(analysis_plan)
-    
+
     def _check_section_completeness(self, state) -> Dict[str, str]:
         """Check presence and quality of mandatory sections"""
         mandatory_sections = [
@@ -3150,11 +3150,11 @@ class ArchitectAgent(BaseAgent):
         ]
         # Implementation
         pass
-    
+
     def _extract_company_profile(self, state) -> Dict:
         """Extract key company characteristics"""
         pass
-    
+
     def _determine_agent_relevance(self, profile: Dict) -> Dict[str, bool]:
         """Determine which agents should be activated"""
         return {
@@ -4883,18 +4883,18 @@ class Scorecard:
     promoter_quality: float  # 0-15
     business_moat: float  # 0-10
     industry_tailwinds: float  # 0-5
-    
+
     # Veto metrics
     promoter_pledge_percent: float
     rpt_concentration_percent: float
     litigation_to_networth_percent: float
     post_issue_promoter_holding: float
-    
+
     # Verdict
     verdict: str  # SUBSCRIBE/AVOID
     verdict_type: str  # LISTING GAINS, LONG TERM, EXPENSIVE, TOXIC
     veto_flags: List[str]
-    
+
 @dataclass
 class RiskExposure:
     """Quantified risk item"""
@@ -5093,13 +5093,13 @@ class Scorecard:
     promoter_quality: float  # 0-15
     business_moat: float  # 0-10
     industry_tailwinds: float  # 0-5
-    
+
     # Veto metrics
     promoter_pledge_percent: float
     rpt_concentration_percent: float
     litigation_to_networth_percent: float
     post_issue_promoter_holding: float
-    
+
     # Verdict
     verdict: str  # SUBSCRIBE/AVOID
     verdict_type: str  # LISTING GAINS, LONG TERM, EXPENSIVE, TOXIC

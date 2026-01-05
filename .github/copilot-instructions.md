@@ -89,16 +89,16 @@ class BaseAgent(ABC):
         self.vector_store = vector_store
         self.citation_mgr = citation_mgr
         self.name = self.__class__.__name__
-    
+
     @abstractmethod
     def analyze(self, state: AnalysisState) -> AgentAnalysis:
         """Perform agent-specific analysis - MUST be implemented"""
         pass
-    
+
     def retrieve_context(self, query: str, filters: Dict, top_k: int = 10) -> List[Chunk]:
         """RAG retrieval from vector store"""
         pass
-    
+
     def cite(self, claim_id: str, chunk: Chunk):
         """Attach citation for audit trail - ALWAYS use for numerical claims"""
         pass
@@ -248,7 +248,7 @@ LLM_CONFIG = {
     "context_model": "Qwen/Qwen2.5-32B-Instruct",      # Large context
     "reasoning_model": "meta-llama/Llama-3.3-70B-Instruct",  # Analysis
     "local_summarizer": "llama3.2:8b-instruct-fp16",  # Via Ollama
-    
+
     # Temperature by task
     "extraction_temp": 0.1,   # Factual extraction
     "analysis_temp": 0.2,     # Reasoning tasks
@@ -303,7 +303,7 @@ Promoter holds 15 other directorships [Other Directorships of Promoters, p. 203]
 ### Objects of Issue Breakdown
 
 ## 3. Industry & Market Opportunity
-## 4. Business Deep Dive  
+## 4. Business Deep Dive
 ## 5. Financial Analysis
 ## 6. Governance & Management
 ## 7. Valuation & Peer Comparison
@@ -415,7 +415,7 @@ class FinancialData:
     cash_conversion_cycle: float
 
 # Investment scorecard
-@dataclass  
+@dataclass
 class Scorecard:
     financial_health_score: float   # 0-10, weight 30%
     valuation_comfort_score: float  # 0-10, weight 20%
