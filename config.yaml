@@ -1,0 +1,52 @@
+# RHP Analyzer Configuration
+
+# Paths
+paths:
+  input_dir: "./data/input"
+  output_dir: "./data/output"
+  logs_dir: "./logs"
+  data_dir: "./data"
+
+# LLM Configuration
+llm:
+  provider: "huggingface"
+  context_model: "Qwen/Qwen2.5-32B-Instruct"
+  reasoning_model: "meta-llama/Llama-3.3-70B-Instruct"
+  temperature: 0.1
+  max_tokens: 4096
+  timeout: 120
+
+# Ingestion Settings
+ingestion:
+  chunk_size: 1000
+  chunk_overlap: 100
+  min_chunk_size: 200
+  batch_size: 32
+
+# Agent Configuration
+agents:
+  enabled:
+    - architect
+    - forensic
+    - red_flag
+    - governance
+    - legal
+    - summarizer
+    - critic
+  max_revisions: 2
+  parallel_execution: true
+
+# Reporting
+reporting:
+  formats:
+    - markdown
+    - pdf
+  template: "default"
+  include_appendices: true
+
+# Logging
+logging:
+  level: "INFO"
+  console: true
+  file: true
+  retention_days: 30

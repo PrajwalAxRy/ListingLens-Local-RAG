@@ -1,0 +1,41 @@
+[project]
+name = "rhp-analyzer"
+version = "0.1.0"
+description = "RHP Analyzer - Indian IPO Red Herring Prospectus Analysis Tool"
+authors = [
+    {name = "Your Name", email = "your.email@example.com"},
+]
+dependencies = [
+    "typer>=0.9.0",
+    "pyyaml>=6.0",
+    "pydantic>=2.5.0",
+    "loguru>=0.7.0",
+    "pymupdf>=1.23.0",
+    "pdfplumber>=0.10.0",
+    "camelot-py>=0.11.0",
+    "spacy>=3.7.0",
+    "sentence-transformers>=2.2.0",
+    "qdrant-client>=1.7.0",
+    "sqlalchemy>=2.0.0",
+    "huggingface-hub>=0.20.0",
+    "langgraph>=0.0.20",
+    "jinja2>=3.1.0",
+    "weasyprint>=60.0",
+    "rich>=13.0.0",
+]
+requires-python = ">=3.10"
+readme = "README.md"
+license = {text = "MIT"}
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.ruff]
+line-length = 120
+target-version = "py310"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+addopts = "-ra -q"
