@@ -5,6 +5,9 @@ description = "RHP Analyzer - Indian IPO Red Herring Prospectus Analysis Tool"
 authors = [
     {name = "Your Name", email = "your.email@example.com"},
 ]
+requires-python = ">=3.10"
+readme = "README.md"
+license = {text = "MIT"}
 dependencies = [
     "typer>=0.9.0",
     "pyyaml>=6.0",
@@ -23,19 +26,52 @@ dependencies = [
     "weasyprint>=60.0",
     "rich>=13.0.0",
 ]
-requires-python = ">=3.10"
-readme = "README.md"
-license = {text = "MIT"}
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4.0",
+    "pytest-cov>=5.0.0",
+    "ruff>=0.1.6",
+    "pre-commit>=3.5.0",
+]
 
 [build-system]
 requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
+[tool.setuptools.packages.find]
+where = ["src"]
+
 [tool.ruff]
 line-length = 120
 target-version = "py310"
 
+[tool.ruff.lint]
+select = [
+    "E",    # pycodestyle errors
+    "W",    # pycodestyle warnings
+    "F",    # pyflakes
+    "I",    # isort
+    "B",    # flake8-bugbear
+    "UP",   # pyupgrade
+    "C4",   # flake8-comprehensions
+    "N",    # pep8-naming
+    "SIM",  # flake8-simplify
+    "RUF"   # ruff-specific rules
+]
+ignore = [
+    "E501", # Line too long (handled by formatting)
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["D", "S"] # Ignore docstrings and security issues in tests
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 python_files = ["test_*.py"]
-addopts = "-ra -q"
+addopts = "-ra -q --cov=src/rhp_analyzer --cov-report=term-missing"
+markers = [
+    "unit: mark a test as a unit test",
+    "integration: mark a test as an integration test",
+    "slow: mark a test as slow",
+]
