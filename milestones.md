@@ -411,7 +411,7 @@ rhp-analyzer/
 #### Subtask 1.2.1: Create Logging Module
 
 **What to do:**
-- Create `src/rhp_analyzer/utils/logging.py`
+- Create `src/rhp_analyzer/utils/log_setup.py`
 - Configure Loguru with console sink (colored, INFO level)
 - Configure file sink with daily rotation (`logs/YYYY-MM-DD.log`)
 - Create setup function called at app startup
