@@ -100,6 +100,10 @@ def setup_logging(log_level: str = "INFO", log_dir: str = "logs"):
         log_level: The logging level for the console (default: "INFO")
         log_dir: Directory to store log files (default: "logs")
     """
+    # Handle None log_dir by using default
+    if log_dir is None:
+        log_dir = "logs"
+
     # Create logs directory if it doesn't exist
     log_path = Path(log_dir)
     log_path.mkdir(parents=True, exist_ok=True)
