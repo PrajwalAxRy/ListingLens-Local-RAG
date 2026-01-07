@@ -151,6 +151,58 @@ class ReportingConfig(BaseSettings):
         return v
 
 
+class StorageConfig(BaseSettings):
+    """Vector and structured storage configuration."""
+
+    model_config = SettingsConfigDict(env_prefix="RHP_STORAGE__", env_nested_delimiter="__")
+
+    # Qdrant vector database settings
+    qdrant_path: Path = Field(default="./data/qdrant", description="Path for Qdrant vector database storage")
+    qdrant_collection: str = Field(default="rhp_chunks", description="Qdrant collection name for RHP vectors")
+    vector_dimension: int = Field(default=1024, gt=0, description="Embedding vector dimension (768 or 1024)")
+
+    # SQLite structured database settings
+    sqlite_path: Path = Field(default="./data/rhp_analyzer.db", description="Path for SQLite structured database")
+
+    @field_validator("qdrant_path", "sqlite_path", mode="before")
+    @classmethod
+    def validate_storage_paths(cls, v):
+        """Convert string paths to Path objects and resolve them."""
+        if isinstance(v, str):
+            return Path(v).expanduser().resolve()
+        return v
+
+    @field_validator("vector_dimension")
+    @classmethod
+    def validate_vector_dimension(cls, v):
+        """Validate that vector dimension matches common embedding models."""
+        if v not in [384, 768, 1024]:
+            raise ValueError(f"vector_dimension must be 384, 768, or 1024 (got {v})")
+        return v
+
+
+class EmbeddingConfig(BaseSettings):
+    """Text embedding model configuration."""
+
+    model_config = SettingsConfigDict(env_prefix="RHP_EMBEDDING__", env_nested_delimiter="__")
+
+    model_name: str = Field(
+        default="nomic-ai/nomic-embed-text-v1.5", description="Sentence transformer model for embeddings"
+    )
+    device: Literal["cpu", "cuda"] = Field(default="cpu", description="Device for embedding generation (cpu or cuda)")
+    normalize_embeddings: bool = Field(default=True, description="Normalize embeddings to unit length")
+    dimension: int = Field(default=1024, gt=0, description="Expected embedding dimension (must match model)")
+    batch_size: int = Field(default=32, gt=0, description="Batch size for embedding generation")
+
+    @field_validator("dimension")
+    @classmethod
+    def validate_dimension(cls, v):
+        """Validate that dimension matches common embedding models."""
+        if v not in [384, 768, 1024]:
+            raise ValueError(f"dimension must be 384, 768, or 1024 (got {v})")
+        return v
+
+
 class LoggingConfig(BaseSettings):
     """Logging system configuration."""
 
@@ -171,6 +223,8 @@ class AppConfig(BaseSettings):
     paths: PathsConfig = Field(default_factory=PathsConfig)
     llm: LLMConfig = Field(default_factory=LLMConfig)
     ingestion: IngestionConfig = Field(default_factory=IngestionConfig)
+    storage: StorageConfig = Field(default_factory=StorageConfig)
+    embedding: EmbeddingConfig = Field(default_factory=EmbeddingConfig)
     agents: AgentsConfig = Field(default_factory=AgentsConfig)
     reporting: ReportingConfig = Field(default_factory=ReportingConfig)
     logging: LoggingConfig = Field(default_factory=LoggingConfig)
@@ -211,7 +265,7 @@ class AppConfig(BaseSettings):
 
         # Create nested config objects
         config_data = {}
-        for section_name in ["paths", "llm", "ingestion", "agents", "reporting", "logging"]:
+        for section_name in ["paths", "llm", "ingestion", "storage", "embedding", "agents", "reporting", "logging"]:
             if section_name in yaml_data:
                 config_data[section_name] = yaml_data[section_name]
 

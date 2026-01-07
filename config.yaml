@@ -23,6 +23,21 @@ ingestion:
   min_chunk_size: 200
   batch_size: 32
 
+# Storage Configuration
+storage:
+  qdrant_path: "./data/qdrant"
+  qdrant_collection: "rhp_chunks"
+  vector_dimension: 1024
+  sqlite_path: "./data/rhp_analyzer.db"
+
+# Embedding Configuration
+embedding:
+  model_name: "nomic-ai/nomic-embed-text-v1.5"
+  device: "cpu"
+  normalize_embeddings: true
+  dimension: 1024
+  batch_size: 32
+
 # Agent Configuration
 agents:
   enabled:

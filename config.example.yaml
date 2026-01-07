@@ -1,0 +1,259 @@
+# RHP Analyzer - Configuration File Template
+#
+# This is a sample configuration file for the RHP Analyzer system.
+# Copy this file to 'config.yaml' and customize values as needed.
+#
+# Configuration Priority (highest to lowest):
+#   1. Command-line arguments
+#   2. Environment variables (prefix: RHP_)
+#   3. This config.yaml file
+#   4. Built-in defaults
+#
+# Environment Variable Format:
+#   Use double underscores to access nested values
+#   Example: RHP_LLM__TEMPERATURE=0.2
+#            RHP_PATHS__OUTPUT_DIR="/custom/path"
+
+# ============================================================================
+# PATHS CONFIGURATION
+# ============================================================================
+# File system paths for input/output and data storage
+# All paths support:
+#   - Relative paths (relative to project root)
+#   - Absolute paths
+#   - Home directory expansion (~/Documents/data)
+paths:
+  # Directory for input RHP PDF files
+  input_dir: "./data/input"
+
+  # Directory where generated reports will be saved
+  output_dir: "./data/output"
+
+  # Directory for application log files
+  logs_dir: "./logs"
+
+  # Base data directory for processed files
+  data_dir: "./data"
+
+# ============================================================================
+# LLM CONFIGURATION
+# ============================================================================
+# Large Language Model settings for analysis agents
+# Note: API key should be set via HF_TOKEN environment variable
+llm:
+  # LLM provider (currently only "huggingface" supported)
+  provider: "huggingface"
+
+  # Model for processing large context (long documents)
+  # Recommended: Qwen/Qwen2.5-32B-Instruct (32K-64K context window)
+  # Alternative: mistralai/Mixtral-8x22B-Instruct-v0.1
+  context_model: "Qwen/Qwen2.5-32B-Instruct"
+
+  # Model for complex reasoning and analysis tasks
+  # Recommended: meta-llama/Llama-3.3-70B-Instruct (best for analysis)
+  reasoning_model: "meta-llama/Llama-3.3-70B-Instruct"
+
+  # Temperature controls randomness (0.0 = deterministic, 2.0 = creative)
+  # Lower values recommended for factual analysis
+  # Range: 0.0 to 2.0
+  temperature: 0.1
+
+  # Maximum tokens per LLM request
+  # Higher values allow longer responses but cost more
+  # Range: 1 to model's max (typically 4096-8192)
+  max_tokens: 4096
+
+  # Request timeout in seconds
+  # Increase if experiencing timeout errors
+  # Range: minimum 30 seconds
+  timeout: 120
+
+# ============================================================================
+# INGESTION CONFIGURATION
+# ============================================================================
+# Document processing and chunking settings
+ingestion:
+  # Target chunk size in tokens (not characters)
+  # Larger chunks = more context but slower processing
+  # Recommended: 500-1500 tokens
+  chunk_size: 1000
+
+  # Overlap between consecutive chunks in tokens
+  # Ensures context continuity across chunk boundaries
+  # Should be < chunk_size (typically 10-20% of chunk_size)
+  chunk_overlap: 100
+
+  # Minimum acceptable chunk size in tokens
+  # Chunks smaller than this will be merged
+  # Should be < chunk_size (typically 20-40% of chunk_size)
+  min_chunk_size: 200
+
+  # Batch size for embedding generation
+  # Higher values = faster but more memory
+  # Recommended: 16-64 depending on available RAM
+  batch_size: 32
+
+# ============================================================================
+# STORAGE CONFIGURATION
+# ============================================================================
+# Vector database and structured storage settings
+storage:
+  # Path for Qdrant vector database (embedded mode)
+  # Stores document chunks as vectors for semantic search
+  # Directory will be created if it doesn't exist
+  qdrant_path: "./data/qdrant"
+
+  # Qdrant collection name for storing RHP document vectors
+  # Each document's chunks are stored in this collection
+  qdrant_collection: "rhp_chunks"
+
+  # Embedding vector dimension (must match embedding model)
+  # Common values: 384 (MiniLM), 768 (BERT-base), 1024 (nomic-v1.5)
+  # Must match the 'dimension' in embedding config below
+  vector_dimension: 1024
+
+  # Path for SQLite database storing structured metadata
+  # Stores document info, entities, financial data, agent outputs
+  sqlite_path: "./data/rhp_analyzer.db"
+
+# ============================================================================
+# EMBEDDING CONFIGURATION
+# ============================================================================
+# Text embedding model settings for semantic search
+embedding:
+  # Sentence transformer model for generating embeddings
+  # Recommended models:
+  #   - nomic-ai/nomic-embed-text-v1.5 (1024 dim, best for long docs)
+  #   - Alibaba-NLP/gte-large-en-v1.5 (1024 dim, good alternative)
+  #   - sentence-transformers/all-MiniLM-L6-v2 (384 dim, lightweight)
+  model_name: "nomic-ai/nomic-embed-text-v1.5"
+
+  # Device for running embedding model
+  # Options: "cpu" or "cuda" (requires NVIDIA GPU)
+  # Use "cuda" if you have a compatible GPU for 10-20x speedup
+  device: "cpu"
+
+  # Normalize embeddings to unit length
+  # Recommended: true (enables cosine similarity)
+  normalize_embeddings: true
+
+  # Expected embedding dimension (must match model output)
+  # Common dimensions:
+  #   - 384: MiniLM models
+  #   - 768: BERT-base models
+  #   - 1024: nomic-v1.5, gte-large
+  # IMPORTANT: Must match 'vector_dimension' in storage config
+  dimension: 1024
+
+  # Batch size for embedding generation
+  # Higher values = faster but more memory
+  # Recommended: 16-64
+  batch_size: 32
+
+# ============================================================================
+# AGENT CONFIGURATION
+# ============================================================================
+# Multi-agent analysis system settings
+agents:
+  # List of enabled analysis agents
+  # Available agents:
+  #   Core Analysis: architect, business, industry, management, capital_structure
+  #   Financial: forensic, valuation, utilization
+  #   Risk: red_flag, governance, legal, promoter_dd
+  #   Synthesis: summarizer, critic, qa, investment_committee
+  enabled:
+    - architect
+    - forensic
+    - red_flag
+    - governance
+    - legal
+    - summarizer
+    - critic
+
+  # Maximum number of self-critic revision cycles
+  # Higher values allow more refinement but take longer
+  # Range: 0-5 (0 = no self-critique)
+  max_revisions: 2
+
+  # Enable parallel execution of independent agents
+  # true = faster (agents run concurrently)
+  # false = sequential (useful for debugging)
+  parallel_execution: true
+
+# ============================================================================
+# REPORTING CONFIGURATION
+# ============================================================================
+# Report generation and output format settings
+reporting:
+  # Output formats to generate
+  # Options: markdown, pdf, json
+  # Multiple formats can be specified
+  formats:
+    - markdown
+    - pdf
+
+  # Report template name
+  # Options: "default" (more templates may be added)
+  template: "default"
+
+  # Include detailed appendices in reports
+  # Appendices contain: detailed tables, full peer analysis, litigation details
+  # true = comprehensive reports (~20-30 pages)
+  # false = executive summary only (~10-15 pages)
+  include_appendices: true
+
+# ============================================================================
+# LOGGING CONFIGURATION
+# ============================================================================
+# Application logging settings
+logging:
+  # Logging level controls verbosity
+  # Options (from least to most verbose):
+  #   CRITICAL: Only critical errors
+  #   ERROR: Errors and critical issues
+  #   WARNING: Warnings, errors, and critical issues
+  #   INFO: General information, warnings, and errors (recommended)
+  #   DEBUG: Detailed debugging information (verbose)
+  level: "INFO"
+
+  # Enable colored console output
+  # true = logs to terminal with colors
+  # false = no console output
+  console: true
+
+  # Enable file logging
+  # true = logs saved to files in logs_dir
+  # false = no file logging (console only)
+  file: true
+
+  # Number of days to retain log files
+  # Older logs are automatically deleted
+  # Range: minimum 1 day
+  retention_days: 30
+
+# ============================================================================
+# NOTES
+# ============================================================================
+#
+# Sensitive Values:
+#   - API keys should NOT be stored in this file
+#   - Use environment variables or .env file instead
+#   - Example: export HF_TOKEN="your_huggingface_token"
+#
+# Performance Tips:
+#   - Use GPU (device: "cuda") for 10-20x faster embedding generation
+#   - Increase batch_size if you have more RAM available
+#   - Enable parallel_execution for faster agent processing
+#   - Reduce chunk_size if running out of memory
+#
+# First-Time Setup:
+#   1. Copy this file to 'config.yaml'
+#   2. Set HF_TOKEN environment variable with your Hugging Face API token
+#   3. Adjust paths if needed (defaults work for most cases)
+#   4. Change device to "cuda" if you have an NVIDIA GPU
+#   5. Run: rhp-analyzer analyze path/to/rhp.pdf
+#
+# For more information, see:
+#   - README.md for setup instructions
+#   - docs/user-guide.md for detailed configuration guide
+#   - docs/developer-guide.md for extending the system
