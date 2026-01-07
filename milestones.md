@@ -458,7 +458,7 @@ with log_context(document_id="DOC001", phase="ingestion"):
 - Test context management
 
 **Verification:**
-- `pytest tests/unit/test_logging.py` passes
+- `pytest tests/unit/test_logging.py`
 - Coverage > 90% for logging module
 
 ---
