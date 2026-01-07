@@ -68,11 +68,15 @@ class ConfigLoader:
             # Step 2: Create merged configuration dict with precedence
             merged_config = self._merge_all_sources()
 
-            # Step 3: Create and validate AppConfig
-            config = AppConfig(**merged_config) if validate else AppConfig.model_construct(**merged_config)
+            # Step 3: Create AppConfig
+            # Always use normal instantiation to ensure nested models are properly created
+            # The 'validate' parameter now only controls whether we skip directory creation
+            # (useful for testing without side effects)
+            config = AppConfig(**merged_config)
 
-            # Step 4: Ensure required directories exist
-            config.ensure_directories()
+            # Step 4: Ensure required directories exist (skip in non-validation mode for testing)
+            if validate:
+                config.ensure_directories()
 
             return config
 

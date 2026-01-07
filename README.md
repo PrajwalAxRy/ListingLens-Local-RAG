@@ -164,4 +164,108 @@ rhp-analyzer --verbose analyze path/to/rhp.pdf
 
 The configuration file (`config.yaml`) defines settings for all components. Use the `rhp-analyzer config` command to view the current merged configuration from all sources (environment variables, custom config file, defaults).
 
-For detailed configuration options, see `config.yaml`.
+**Configuration Precedence** (highest to lowest):
+1. Environment variables (prefix: `RHP_`, use `__` for nesting)
+2. Custom config file (via `--config` flag)
+3. Default `config.yaml` in project root
+4. Built-in defaults in code
+
+**Environment Variable Examples**:
+```bash
+# Set log level
+set RHP_LOG_LEVEL=DEBUG
+
+# Override LLM timeout (Windows)
+set RHP_LLM__TIMEOUT=180
+
+# Set HuggingFace token (required for LLM access)
+set HF_TOKEN=your_token_here
+```
+
+For all configuration options, see `config.yaml` and `config.example.yaml`.
+
+## Development
+
+### Setting Up the Development Environment
+
+```bash
+# Clone and navigate to project
+git clone <repository-url>
+cd listing-lens-RAG-Test
+
+# Create and activate virtual environment
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1  # Windows PowerShell
+
+# Install dependencies
+pip install -r requirements.txt
+pip install -r requirements-dev.txt
+pip install -e .
+```
+
+### Running Tests
+
+```bash
+# Run all tests
+pytest tests/
+
+# Run with coverage report
+pytest tests/ --cov=src/rhp_analyzer --cov-report=term-missing
+
+# Run specific test file
+pytest tests/unit/test_config.py -v
+
+# Run with verbose output
+pytest tests/ -v
+```
+
+### Code Quality
+
+The project uses Ruff for linting and formatting:
+
+```bash
+# Check for issues
+ruff check .
+
+# Auto-fix issues
+ruff check . --fix
+
+# Format code
+ruff format .
+```
+
+Pre-commit hooks are configured - install with:
+```bash
+pre-commit install
+```
+
+### Project Structure
+
+```
+src/rhp_analyzer/
+├── cli/              # Command-line interface (Typer)
+│   ├── main.py       # CLI entry point with global options
+│   └── commands/     # Individual CLI commands
+├── config/           # Configuration management
+│   ├── loader.py     # YAML + env var loading with precedence
+│   └── schema.py     # Pydantic models for validation
+├── ingestion/        # PDF processing (Phase 2)
+├── storage/          # Vector DB and SQL storage (Phase 3)
+├── agents/           # LLM analysis agents (Phase 4)
+├── reporting/        # Report generation (Phase 5)
+└── utils/            # Shared utilities
+    ├── log_setup.py  # Loguru configuration
+    └── progress.py   # Rich progress display
+```
+
+### Logging
+
+Logs are written to the `logs/` directory with daily rotation:
+- `logs/YYYY-MM-DD.log` - All logs (INFO and above)
+- `logs/errors.log` - Error-only log for quick debugging
+
+Use `--verbose` flag for DEBUG-level console output.
+
+## License
+
+See [LICENSE](LICENSE) for details.
