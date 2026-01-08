@@ -29,6 +29,14 @@ from rhp_analyzer.ingestion.table_extractor import (
     TableExtractor,
     TableType,
 )
+from rhp_analyzer.ingestion.section_mapper import (
+    Section,
+    SectionMapper,
+    SectionTree,
+    SectionType,
+    STANDARD_RHP_SECTIONS,
+    normalize_section_name,
+)
 
 __all__ = [
     # PDF Processor
@@ -52,4 +60,11 @@ __all__ = [
     "Table",
     "TableType",
     "FinancialData",
+    # Section Mapper
+    "SectionMapper",
+    "Section",
+    "SectionTree",
+    "SectionType",
+    "STANDARD_RHP_SECTIONS",
+    "normalize_section_name",
 ]
