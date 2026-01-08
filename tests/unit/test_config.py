@@ -14,6 +14,7 @@ from unittest.mock import patch
 
 import pytest
 import yaml
+
 from rhp_analyzer.config import AppConfig
 from rhp_analyzer.config.loader import ConfigLoader, ConfigurationError, load_config
 

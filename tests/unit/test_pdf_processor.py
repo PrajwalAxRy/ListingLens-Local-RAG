@@ -13,6 +13,7 @@ from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
+
 from rhp_analyzer.ingestion.pdf_processor import (
     PageInfo,
     PDFMetadata,

@@ -5,8 +5,9 @@ import tempfile
 from pathlib import Path
 
 import pytest
-from rhp_analyzer.cli.main import app
 from typer.testing import CliRunner
+
+from rhp_analyzer.cli.main import app
 
 # Initialize CLI test runner
 runner = CliRunner()

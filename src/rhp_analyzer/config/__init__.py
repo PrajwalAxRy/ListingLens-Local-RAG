@@ -23,11 +23,11 @@ from .schema import (
 )
 
 __all__ = [
-    "AppConfig",
-    "PathsConfig",
-    "LLMConfig",
-    "IngestionConfig",
     "AgentsConfig",
-    "ReportingConfig",
+    "AppConfig",
+    "IngestionConfig",
+    "LLMConfig",
     "LoggingConfig",
+    "PathsConfig",
+    "ReportingConfig",
 ]

@@ -21,6 +21,14 @@ from rhp_analyzer.ingestion.pdf_processor import (
     PDFProcessor,
     PDFValidationError,
 )
+from rhp_analyzer.ingestion.table_extractor import (
+    FinancialData,
+    FinancialTableParser,
+    Table,
+    TableClassifier,
+    TableExtractor,
+    TableType,
+)
 
 __all__ = [
     # PDF Processor
@@ -37,4 +45,11 @@ __all__ = [
     "TesseractNotFoundError",
     "OCRProcessingError",
     "ocr_pdf_page",
+    # Table Extractor
+    "TableExtractor",
+    "TableClassifier",
+    "FinancialTableParser",
+    "Table",
+    "TableType",
+    "FinancialData",
 ]

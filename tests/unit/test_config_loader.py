@@ -4,6 +4,7 @@ import os
 from pathlib import Path
 
 import pytest
+
 from rhp_analyzer.config.loader import ConfigLoader, ConfigurationError, load_config, load_config_for_testing
 
 
