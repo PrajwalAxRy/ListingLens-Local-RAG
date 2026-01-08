@@ -21,6 +21,14 @@ from rhp_analyzer.ingestion.pdf_processor import (
     PDFProcessor,
     PDFValidationError,
 )
+from rhp_analyzer.ingestion.section_mapper import (
+    STANDARD_RHP_SECTIONS,
+    Section,
+    SectionMapper,
+    SectionTree,
+    SectionType,
+    normalize_section_name,
+)
 from rhp_analyzer.ingestion.table_extractor import (
     FinancialData,
     FinancialTableParser,
@@ -28,14 +36,6 @@ from rhp_analyzer.ingestion.table_extractor import (
     TableClassifier,
     TableExtractor,
     TableType,
-)
-from rhp_analyzer.ingestion.section_mapper import (
-    Section,
-    SectionMapper,
-    SectionTree,
-    SectionType,
-    STANDARD_RHP_SECTIONS,
-    normalize_section_name,
 )
 
 __all__ = [

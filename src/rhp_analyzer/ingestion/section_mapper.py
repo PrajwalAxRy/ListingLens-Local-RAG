@@ -300,9 +300,7 @@ class SectionMapper:
         # Return most common font size (assumed to be body text)
         return max(font_size_counts, key=font_size_counts.get)
 
-    def _detect_section_headers(
-        self, pages: list[Any], baseline_font_size: float
-    ) -> list[dict[str, Any]]:
+    def _detect_section_headers(self, pages: list[Any], baseline_font_size: float) -> list[dict[str, Any]]:
         """
         Detect potential section headers from pages.
 
@@ -368,15 +366,17 @@ class SectionMapper:
                         line_stripped, max_font_size, baseline_font_size, has_numbering
                     )
 
-                    candidates.append({
-                        "title": line_stripped,
-                        "page_num": page_num,
-                        "section_type": section_type,
-                        "level": level,
-                        "score": header_score,
-                        "is_uppercase": is_uppercase,
-                        "font_size": max_font_size,
-                    })
+                    candidates.append(
+                        {
+                            "title": line_stripped,
+                            "page_num": page_num,
+                            "section_type": section_type,
+                            "level": level,
+                            "score": header_score,
+                            "is_uppercase": is_uppercase,
+                            "font_size": max_font_size,
+                        }
+                    )
 
         # Remove duplicates and sort by page number
         candidates = self._deduplicate_candidates(candidates)
@@ -435,9 +435,7 @@ class SectionMapper:
         else:
             return 3
 
-    def _deduplicate_candidates(
-        self, candidates: list[dict[str, Any]]
-    ) -> list[dict[str, Any]]:
+    def _deduplicate_candidates(self, candidates: list[dict[str, Any]]) -> list[dict[str, Any]]:
         """
         Remove duplicate header candidates.
 
@@ -463,9 +461,7 @@ class SectionMapper:
 
         return unique
 
-    def _build_sections(
-        self, candidates: list[dict[str, Any]], pages: list[Any]
-    ) -> list[Section]:
+    def _build_sections(self, candidates: list[dict[str, Any]], pages: list[Any]) -> list[Section]:
         """
         Build Section objects from header candidates.
 
@@ -506,9 +502,7 @@ class SectionMapper:
 
         return sections
 
-    def _assign_section_content(
-        self, sections: list[Section], pages: list[Any]
-    ) -> None:
+    def _assign_section_content(self, sections: list[Section], pages: list[Any]) -> None:
         """
         Assign content and calculate metadata for each section.
 
@@ -601,9 +595,7 @@ class SectionMapper:
 
         return boundaries
 
-    def get_section_for_page(
-        self, tree: SectionTree, page_num: int
-    ) -> list[Section]:
+    def get_section_for_page(self, tree: SectionTree, page_num: int) -> list[Section]:
         """
         Get all sections that contain a specific page.
 
