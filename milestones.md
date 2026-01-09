@@ -1081,7 +1081,7 @@ class OCRProcessor:
 
 **Deliverables:** Unified ingestion pipeline combining all extractors
 
-#### Subtask 2.5.1: Create Pipeline Orchestrator
+#### Subtask 2.5.1: Create Pipeline Orchestrator ✅ COMPLETE
 
 **What to do:**
 - Create `src/rhp_analyzer/ingestion/pipeline.py`
@@ -1101,9 +1101,11 @@ class OCRProcessor:
 - Full pipeline runs on sample RHP
 - Intermediate results saved
 
+**Completed:** Pipeline orchestrator implemented with PipelineStage enum, progress tracking, error handling, and all 5 stages.
+
 ---
 
-#### Subtask 2.5.2: Add Checkpoint/Resume
+#### Subtask 2.5.2: Add Checkpoint/Resume ✅ COMPLETE
 
 **What to do:**
 - Save state after each major stage
@@ -1119,9 +1121,11 @@ class OCRProcessor:
 - Kill process mid-run, resume works
 - Completed stages not re-run
 
+**Completed:** Checkpoint system with PipelineCheckpoint dataclass, JSON persistence, stage-aware resume, and automatic cleanup on success.
+
 ---
 
-#### Subtask 2.5.3: Create Integration Tests
+#### Subtask 2.5.3: Create Integration Tests ✅ COMPLETE
 
 **What to do:**
 - Create `tests/integration/test_ingestion_pipeline.py`
@@ -1132,6 +1136,8 @@ class OCRProcessor:
 **Verification:**
 - `pytest tests/integration/` passes
 - Output files exist and valid
+
+**Completed:** 13 integration tests covering full pipeline run, stage execution, checkpoint/resume, error handling, result serialization, and progress callbacks.
 
 ---
 

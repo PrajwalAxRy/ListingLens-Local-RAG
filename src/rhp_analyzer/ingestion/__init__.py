@@ -37,6 +37,12 @@ from rhp_analyzer.ingestion.table_extractor import (
     TableExtractor,
     TableType,
 )
+from rhp_analyzer.ingestion.pipeline import (
+    IngestionPipeline,
+    PipelineCheckpoint,
+    PipelineResult,
+    PipelineStage,
+)
 
 __all__ = [
     # PDF Processor
@@ -67,4 +73,9 @@ __all__ = [
     "SectionType",
     "STANDARD_RHP_SECTIONS",
     "normalize_section_name",
+    # Ingestion Pipeline
+    "IngestionPipeline",
+    "PipelineCheckpoint",
+    "PipelineResult",
+    "PipelineStage",
 ]
