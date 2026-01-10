@@ -43,6 +43,30 @@ from rhp_analyzer.ingestion.pipeline import (
     PipelineResult,
     PipelineStage,
 )
+from rhp_analyzer.ingestion.promoter_extractor import (
+    PromoterDossier,
+    PromoterExtractor,
+)
+from rhp_analyzer.ingestion.pre_ipo_analyzer import (
+    PreIPOInvestor,
+    PreIPOInvestorAnalyzer,
+)
+from rhp_analyzer.ingestion.order_book_analyzer import (
+    OrderBookAnalysis,
+    OrderBookAnalyzer,
+)
+from rhp_analyzer.ingestion.objects_tracker import (
+    ObjectsOfIssueAnalysis,
+    ObjectsOfIssueTracker,
+)
+from rhp_analyzer.ingestion.contingent_liability_analyzer import (
+    ContingentLiabilityAnalysis,
+    ContingentLiabilityCategorizer,
+)
+from rhp_analyzer.ingestion.stub_analyzer import (
+    StubPeriodAnalysis,
+    StubPeriodAnalyzer,
+)
 
 __all__ = [
     # PDF Processor
@@ -78,4 +102,18 @@ __all__ = [
     "PipelineCheckpoint",
     "PipelineResult",
     "PipelineStage",
+    # Promoter & Investor analyzers
+    "PromoterExtractor",
+    "PromoterDossier",
+    "PreIPOInvestor",
+    "PreIPOInvestorAnalyzer",
+    # Specialized analyzers
+    "OrderBookAnalysis",
+    "OrderBookAnalyzer",
+    "ObjectsOfIssueTracker",
+    "ObjectsOfIssueAnalysis",
+    "ContingentLiabilityCategorizer",
+    "ContingentLiabilityAnalysis",
+    "StubPeriodAnalyzer",
+    "StubPeriodAnalysis",
 ]
