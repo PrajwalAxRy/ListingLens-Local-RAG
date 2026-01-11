@@ -137,10 +137,18 @@ class ProgressTracker:
     def complete_phase(self):
         """Mark the current phase as complete."""
         if self.current_task is not None and self.is_tty:
-            self.progress.update(
-                self.current_task,
-                completed=self.progress.tasks[self.current_task].total,
-            )
+            # Get task by ID - tasks is a list, iterate to find matching task
+            task = None
+            for t in self.progress.tasks:
+                if t.id == self.current_task:
+                    task = t
+                    break
+
+            if task is not None and task.total is not None:
+                self.progress.update(
+                    self.current_task,
+                    completed=task.total,
+                )
 
         # Update overall progress
         if self.overall_task is not None:
@@ -150,6 +158,10 @@ class ProgressTracker:
             )
 
         logger.info(f"Completed phase {self.current_phase}/{self.total_phases}")
+
+    def stop(self):
+        """Stop the progress tracker (alias for error handling)."""
+        self.progress.stop()
 
     def finish(self, message: str = "Processing complete"):
         """

@@ -3,11 +3,7 @@ Unit tests for Entity Extractor Module
 """
 
 import pytest
-from src.rhp_analyzer.ingestion.entity_extractor import (
-    EntityExtractor,
-    Entity,
-    EntityType
-)
+from rhp_analyzer.ingestion.entity_extractor import Entity, EntityExtractor, EntityType
 
 
 @pytest.fixture
@@ -23,47 +19,47 @@ class TestEntityExtraction:
         """Test company name extraction"""
         text = "ABC Technologies Limited is a leading software company."
         entities = extractor.extract_entities(text)
-        
+
         company_entities = [e for e in entities if e.entity_type == EntityType.COMPANY]
         assert len(company_entities) > 0
-        
+
         # Check if company name is extracted
         company_texts = [e.text for e in company_entities]
-        assert any('ABC Technologies' in text for text in company_texts)
+        assert any("ABC Technologies" in text for text in company_texts)
 
     def test_extract_person_name(self, extractor):
         """Test person name extraction with honorifics"""
         text = "Mr. Rajesh Kumar is the Managing Director of the company."
         entities = extractor.extract_entities(text)
-        
+
         person_entities = [e for e in entities if e.entity_type == EntityType.PERSON]
         assert len(person_entities) > 0
-        
+
         # Check if person name is extracted
         person_texts = [e.text.lower() for e in person_entities]
-        assert any('rajesh' in text or 'kumar' in text for text in person_texts)
+        assert any("rajesh" in text or "kumar" in text for text in person_texts)
 
     def test_extract_location(self, extractor):
         """Test location extraction"""
         text = "The company's head office is in Mumbai, India."
         entities = extractor.extract_entities(text)
-        
+
         location_entities = [e for e in entities if e.entity_type == EntityType.LOCATION]
         assert len(location_entities) > 0
-        
+
         # Check if Mumbai or India is extracted
         location_texts = [e.text for e in location_entities]
-        assert any('Mumbai' in text or 'India' in text for text in location_texts)
+        assert any("Mumbai" in text or "India" in text for text in location_texts)
 
     def test_extract_regulator(self, extractor):
         """Test regulator entity extraction"""
         text = "The company is registered with SEBI and regulated by RBI."
         entities = extractor.extract_entities(text)
-        
+
         org_entities = [e for e in entities if e.entity_type == EntityType.ORG]
         org_texts = [e.text for e in org_entities]
-        
-        assert 'SEBI' in org_texts or 'RBI' in org_texts
+
+        assert "SEBI" in org_texts or "RBI" in org_texts
 
 
 class TestFinancialEntityPatterns:
@@ -76,16 +72,15 @@ class TestFinancialEntityPatterns:
             ("Rs. 1,234.5 crore", 1234.5, 12_345_000_000),
             ("100 Cr", 100, 1_000_000_000),
         ]
-        
+
         for text, expected_crore, expected_value in test_cases:
             entities = extractor.extract_entities(text)
             money_entities = [e for e in entities if e.entity_type == EntityType.MONEY and e.value is not None]
-            
+
             assert len(money_entities) > 0, f"Failed to extract from: {text}"
             # Check if value is approximately correct (within 1% tolerance)
             assert any(
-                abs(e.value - expected_value) / expected_value < 0.01 
-                for e in money_entities
+                abs(e.value - expected_value) / expected_value < 0.01 for e in money_entities
             ), f"Value mismatch for: {text}. Got: {[e.value for e in money_entities]}"
 
     def test_extract_lakhs(self, extractor):
@@ -95,15 +90,14 @@ class TestFinancialEntityPatterns:
             ("Rs. 10 lakh", 10, 1_000_000),
             ("200.5 lacs", 200.5, 20_050_000),
         ]
-        
+
         for text, expected_lakh, expected_value in test_cases:
             entities = extractor.extract_entities(text)
             money_entities = [e for e in entities if e.entity_type == EntityType.MONEY and e.value is not None]
-            
+
             assert len(money_entities) > 0, f"Failed to extract from: {text}"
             assert any(
-                abs(e.value - expected_value) / expected_value < 0.01 
-                for e in money_entities
+                abs(e.value - expected_value) / expected_value < 0.01 for e in money_entities
             ), f"Value mismatch for: {text}. Got: {[e.value for e in money_entities]}"
 
     def test_extract_percentage(self, extractor):
@@ -113,15 +107,14 @@ class TestFinancialEntityPatterns:
             ("Growth of 15.5%", 15.5),
             ("100% compliance", 100.0),
         ]
-        
+
         for text, expected_value in test_cases:
             entities = extractor.extract_entities(text)
             pct_entities = [e for e in entities if e.entity_type == EntityType.PERCENTAGE and e.value is not None]
-            
+
             assert len(pct_entities) > 0, f"Failed to extract from: {text}"
             assert any(
-                abs(e.value - expected_value) < 0.01 
-                for e in pct_entities
+                abs(e.value - expected_value) < 0.01 for e in pct_entities
             ), f"Value mismatch for: {text}. Got: {[e.value for e in pct_entities]}"
 
     def test_extract_fiscal_year(self, extractor):
@@ -132,15 +125,14 @@ class TestFinancialEntityPatterns:
             ("Fiscal Year 2022-23", "FY22-23"),
             ("FY 2024", "FY24"),
         ]
-        
+
         for text, expected_normalized in test_cases:
             entities = extractor.extract_entities(text)
             fy_entities = [e for e in entities if e.entity_type == EntityType.FISCAL_YEAR]
-            
+
             assert len(fy_entities) > 0, f"Failed to extract from: {text}"
             assert any(
-                e.normalized_text == expected_normalized 
-                for e in fy_entities
+                e.normalized_text == expected_normalized for e in fy_entities
             ), f"Normalization failed for: {text}"
 
     def test_extract_date(self, extractor):
@@ -150,15 +142,14 @@ class TestFinancialEntityPatterns:
             ("Date: 01-12-2023", "2023-12-01"),
             ("31.01.2024", "2024-01-31"),
         ]
-        
+
         for text, expected_normalized in test_cases:
             entities = extractor.extract_entities(text)
             date_entities = [e for e in entities if e.entity_type == EntityType.DATE]
-            
+
             assert len(date_entities) > 0, f"Failed to extract from: {text}"
             assert any(
-                e.normalized_text == expected_normalized 
-                for e in date_entities
+                e.normalized_text == expected_normalized for e in date_entities
             ), f"Date normalization failed for: {text}"
 
     def test_extract_price_band(self, extractor):
@@ -168,16 +159,15 @@ class TestFinancialEntityPatterns:
             "Rs. 500 - Rs. 550",
             "Price band: ₹1,000-₹1,200",
         ]
-        
+
         for text in test_cases:
             entities = extractor.extract_entities(text)
             money_entities = [e for e in entities if e.entity_type == EntityType.MONEY]
-            
+
             assert len(money_entities) > 0, f"Failed to extract price band from: {text}"
             # Price band should have a normalized format
             assert any(
-                '-' in (e.normalized_text or '') 
-                for e in money_entities
+                "-" in (e.normalized_text or "") for e in money_entities
             ), f"Price band not properly formatted: {text}"
 
 
@@ -191,9 +181,9 @@ class TestEntityDeduplication:
             Entity(text="ABC Limited", entity_type=EntityType.COMPANY, page_num=2),
             Entity(text="ABC Limited", entity_type=EntityType.COMPANY, page_num=3),
         ]
-        
+
         deduplicated = extractor.deduplicate_entities(entities)
-        
+
         assert len(deduplicated) == 1
         assert deduplicated[0].mentions == 3
         assert len(deduplicated[0].page_references) == 3
@@ -205,9 +195,9 @@ class TestEntityDeduplication:
             Entity(text="ABC Technologies Ltd", entity_type=EntityType.COMPANY, page_num=2),
             Entity(text="ABC Technologies", entity_type=EntityType.COMPANY, page_num=3),
         ]
-        
+
         deduplicated = extractor.deduplicate_entities(entities)
-        
+
         # Should deduplicate to single entity
         assert len(deduplicated) <= 2  # Allow for some variation tolerance
         # Most mentioned form should have multiple page references
@@ -219,9 +209,9 @@ class TestEntityDeduplication:
             Entity(text="ABC", entity_type=EntityType.COMPANY, page_num=1),
             Entity(text="ABC", entity_type=EntityType.PERSON, page_num=2),
         ]
-        
+
         deduplicated = extractor.deduplicate_entities(entities)
-        
+
         # Should remain as 2 separate entities
         assert len(deduplicated) == 2
 
@@ -236,7 +226,7 @@ class TestEntityNormalization:
             ("XYZ Pvt. Ltd.", "XYZ"),
             ("Tech Corp", "Tech Corp"),
         ]
-        
+
         for original, expected_base in test_cases:
             normalized = extractor._normalize_entity_text(original, EntityType.COMPANY)
             # Check that common suffixes are removed
@@ -251,7 +241,7 @@ class TestEntityNormalization:
             ("Dr. Priya Sharma", "Priya Sharma"),
             ("Ms. Anjali Singh", "Anjali Singh"),
         ]
-        
+
         for original, expected in test_cases:
             normalized = extractor._normalize_entity_text(original, EntityType.PERSON)
             # Check that honorifics are removed
@@ -272,9 +262,9 @@ class TestCoreferenceResolution:
             Entity(text="ABC Technologies Ltd", entity_type=EntityType.COMPANY, mentions=3, page_num=2),
             Entity(text="ABC Tech", entity_type=EntityType.COMPANY, mentions=2, page_num=3),
         ]
-        
+
         resolved = extractor.resolve_coreferences(entities)
-        
+
         # Should resolve to single entity with most mentions
         assert len(resolved) <= 2  # Allow some tolerance
         # Check that mentions are aggregated
@@ -287,9 +277,9 @@ class TestCoreferenceResolution:
             Entity(text="Mr. John Doe", entity_type=EntityType.PERSON, mentions=3, page_num=1),
             Entity(text="John Doe", entity_type=EntityType.PERSON, mentions=5, page_num=2),
         ]
-        
+
         resolved = extractor.resolve_coreferences(entities)
-        
+
         # Should resolve to single entity
         assert len(resolved) == 1
         # Check aliases are captured
@@ -306,19 +296,19 @@ class TestExtractAll:
             (2, "The company, ABC Ltd, has offices in Mumbai and Delhi."),
             (3, "Mr. Rajesh Kumar is the CEO. The company has a ROE of 25%."),
         ]
-        
+
         result = extractor.extract_all(pages_text)
-        
+
         # Should have multiple entity types
         assert len(result) > 0
-        
+
         # Check for expected entity types
         if EntityType.COMPANY in result:
             assert len(result[EntityType.COMPANY]) > 0
-        
+
         if EntityType.MONEY in result:
             assert len(result[EntityType.MONEY]) > 0
-        
+
         if EntityType.FISCAL_YEAR in result:
             assert len(result[EntityType.FISCAL_YEAR]) > 0
 
@@ -329,13 +319,13 @@ class TestExtractAll:
             (2, "ABC Limited reported strong growth."),
             (5, "ABC Limited has offices in Mumbai."),
         ]
-        
+
         result = extractor.extract_all(pages_text)
-        
+
         # Get company entities
         if EntityType.COMPANY in result:
             for entity in result[EntityType.COMPANY]:
-                if 'ABC' in entity.text:
+                if "ABC" in entity.text:
                     # Should have references from multiple pages
                     assert len(entity.page_references) > 1
                     # Check specific page numbers
@@ -373,7 +363,7 @@ class TestEdgeCases:
             "Rs. ,, lakhs",  # Invalid commas
             "₹ crores",  # Missing amount
         ]
-        
+
         for text in test_cases:
             entities = extractor.extract_entities(text)
             # Should not crash, may or may not extract
@@ -386,7 +376,7 @@ class TestEdgeCases:
             "00/00/0000",  # Zero date
             "31/02/2024",  # Invalid day for February
         ]
-        
+
         for text in test_cases:
             entities = extractor.extract_entities(text)
             date_entities = [e for e in entities if e.entity_type == EntityType.DATE]
@@ -400,30 +390,30 @@ class TestIntegration:
     def test_realistic_rhp_paragraph(self, extractor):
         """Test extraction from realistic RHP paragraph"""
         text = """
-        ABC Technologies Limited (the "Company") was incorporated on 15/03/2010 
-        under the Companies Act. The company reported a revenue of ₹1,234.5 crores 
+        ABC Technologies Limited (the "Company") was incorporated on 15/03/2010
+        under the Companies Act. The company reported a revenue of ₹1,234.5 crores
         in FY 2023-24, representing a growth of 25% over the previous fiscal year.
-        The company's registered office is in Mumbai, Maharashtra. Mr. Rajesh Kumar 
-        serves as the Managing Director. The company is registered with SEBI and 
-        maintains compliance with all regulatory requirements. The price band for 
+        The company's registered office is in Mumbai, Maharashtra. Mr. Rajesh Kumar
+        serves as the Managing Director. The company is registered with SEBI and
+        maintains compliance with all regulatory requirements. The price band for
         the IPO is ₹500 to ₹550 per share.
         """
-        
+
         entities = extractor.extract_entities(text, page_num=1)
-        
+
         # Check that various entity types are extracted
         entity_types = {e.entity_type for e in entities}
-        
+
         # Should have multiple types
         assert len(entity_types) >= 3
-        
+
         # Check for specific extractions
         company_entities = [e for e in entities if e.entity_type == EntityType.COMPANY]
         assert len(company_entities) > 0
-        
+
         money_entities = [e for e in entities if e.entity_type == EntityType.MONEY]
         assert len(money_entities) > 0  # Should extract revenue and price band
-        
+
         fy_entities = [e for e in entities if e.entity_type == EntityType.FISCAL_YEAR]
         assert len(fy_entities) > 0
 
@@ -437,16 +427,16 @@ class TestIntegration:
         - ROE: 22%
         - Debt/Equity: 0.5
         """
-        
+
         entities = extractor.extract_entities(text)
-        
+
         # Should extract multiple financial entities
         money_entities = [e for e in entities if e.entity_type == EntityType.MONEY]
         assert len(money_entities) >= 3  # Revenue, EBITDA, PAT
-        
+
         fy_entities = [e for e in entities if e.entity_type == EntityType.FISCAL_YEAR]
         assert len(fy_entities) >= 2
-        
+
         pct_entities = [e for e in entities if e.entity_type == EntityType.PERCENTAGE]
         assert len(pct_entities) >= 1  # ROE
 

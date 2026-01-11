@@ -217,7 +217,52 @@ pytest tests/unit/test_config.py -v
 
 # Run with verbose output
 pytest tests/ -v
+
+# Run integration tests only
+pytest tests/integration/ -v
 ```
+
+### Test Coverage
+
+Current test coverage statistics (Phase 2 Checkpoint - January 2025):
+
+| Module | Coverage |
+|--------|----------|
+| Overall | **78%** |
+| pipeline.py | 89% |
+| section_mapper.py | 100% |
+| entity_extractor.py | 90% |
+| pdf_processor.py | 73% |
+| table_extractor.py | 81% |
+| financial_parser.py | 79% |
+| promoter_extractor.py | 87% |
+| All specialized extractors | 75-90% |
+
+**Test Summary**: 383 tests passing, 2 skipped (require real PDF)
+
+### Ingestion Pipeline
+
+The ingestion pipeline processes RHP PDFs through 5 stages:
+
+1. **PDF Validation** - Verify PDF integrity and readability
+2. **Page Extraction** - Extract text from all pages using PyMuPDF
+3. **Table Extraction** - Detect and parse tables (pdfplumber + camelot)
+4. **Section Mapping** - Map document sections hierarchically
+5. **Entity Extraction** - Extract companies, people, amounts using NER
+
+**Features**:
+- Checkpoint/resume capability for long-running jobs
+- Progress tracking with Rich console output
+- Automatic OCR fallback for scanned pages
+- 8 specialized extractors for IPO-specific data:
+  - Financial Parser (P&L, Balance Sheet, ratios)
+  - Promoter Extractor (background, shareholding, conflicts)
+  - Pre-IPO Investor Analyzer (entry prices, IRR calculations)
+  - Order Book Analyzer (for B2B/EPC sectors)
+  - Debt Structure Analyzer (maturity, covenants)
+  - Contingent Liability Categorizer (risk-weighted)
+  - Objects of Issue Tracker (use of proceeds)
+  - Stub Period Analyzer (interim financials)
 
 ### Code Quality
 
