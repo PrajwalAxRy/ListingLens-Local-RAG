@@ -25,6 +25,13 @@ from rhp_analyzer.storage.embeddings import (
     compute_similarity,
     generate_embeddings,
 )
+from rhp_analyzer.storage.vector_store import (
+    SearchResult,
+    SearchUtility,
+    VectorStore,
+    VectorStoreConfig,
+    create_vector_store,
+)
 
 __all__ = [
     # Chunking
@@ -39,4 +46,10 @@ __all__ = [
     "EmbeddingGenerator",
     "compute_similarity",
     "generate_embeddings",
+    # Vector Store
+    "VectorStore",
+    "VectorStoreConfig",
+    "SearchResult",
+    "SearchUtility",
+    "create_vector_store",
 ]
