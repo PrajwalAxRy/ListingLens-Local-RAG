@@ -55,6 +55,10 @@ from rhp_analyzer.storage.vector_store import (
     VectorStoreConfig,
     create_vector_store,
 )
+from rhp_analyzer.storage.file_manager import (
+    FileManager,
+    create_file_manager,
+)
 
 __all__ = [
     # Chunking
@@ -97,4 +101,7 @@ __all__ = [
     "SearchResult",
     "SearchUtility",
     "create_vector_store",
+    # File Manager
+    "FileManager",
+    "create_file_manager",
 ]
