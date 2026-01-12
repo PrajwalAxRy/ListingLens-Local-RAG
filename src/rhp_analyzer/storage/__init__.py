@@ -18,12 +18,35 @@ from rhp_analyzer.storage.chunker import (
     SemanticChunker,
     chunk_text,
 )
+from rhp_analyzer.storage.database import (
+    AgentOutput,
+    Base,
+    BaseRepository,
+    ChunkMetadata,
+    DatabaseManager,
+    Document,
+    Entity,
+    ExtractedTable,
+    FinancialData,
+    RiskFactor,
+    Section,
+)
 from rhp_analyzer.storage.embeddings import (
     CacheMetadata,
     EmbeddingConfig,
     EmbeddingGenerator,
     compute_similarity,
     generate_embeddings,
+)
+from rhp_analyzer.storage.repositories import (
+    AgentOutputRepository,
+    ChunkMetadataRepository,
+    DocumentRepository,
+    EntityRepository,
+    ExtractedTableRepository,
+    FinancialDataRepository,
+    RiskFactorRepository,
+    SectionRepository,
 )
 from rhp_analyzer.storage.vector_store import (
     SearchResult,
@@ -40,6 +63,28 @@ __all__ = [
     "ChunkingConfig",
     "SemanticChunker",
     "chunk_text",
+    # Database Models
+    "Base",
+    "Document",
+    "Section",
+    "ExtractedTable",
+    "Entity",
+    "FinancialData",
+    "RiskFactor",
+    "AgentOutput",
+    "ChunkMetadata",
+    # Database Manager
+    "DatabaseManager",
+    "BaseRepository",
+    # Repositories
+    "DocumentRepository",
+    "SectionRepository",
+    "ExtractedTableRepository",
+    "EntityRepository",
+    "FinancialDataRepository",
+    "RiskFactorRepository",
+    "AgentOutputRepository",
+    "ChunkMetadataRepository",
     # Embeddings
     "CacheMetadata",
     "EmbeddingConfig",
