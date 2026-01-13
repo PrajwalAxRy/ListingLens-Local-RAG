@@ -1,5 +1,6 @@
 # Ignore blueprint.md
-blueprint.md
+#blueprint.md
+
 # Python
 __pycache__/
 *.py[cod]

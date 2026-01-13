@@ -71,6 +71,8 @@ src/
 ```
 
 ---
+### Extra instructions
+Note: make sure to activate python venv at the beginning of the code generation if any code is to be executed.
 
 ## Agent Implementation Guidelines
 
