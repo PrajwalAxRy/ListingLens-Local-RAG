@@ -154,7 +154,7 @@ Final Report Output
   - Fast, handles both digital and scanned PDFs
   - Extracts text with position coordinates
   - Handles embedded images
-  
+
 - **Fallback Parser**: pdfplumber
   - Better table detection
   - More accurate layout preservation
@@ -174,19 +174,19 @@ class PDFProcessor:
         self.pdf_path = pdf_path
         self.metadata = {}
         self.pages = []
-        
+
     def extract_with_pymupdf(self) -> List[Page]:
         """Primary extraction method"""
         pass
-        
+
     def extract_with_pdfplumber(self) -> List[Page]:
         """Fallback for complex layouts"""
         pass
-        
+
     def detect_scanned_pages(self) -> List[int]:
         """Identify pages needing OCR"""
         pass
-        
+
     def apply_ocr(self, page_num: int) -> str:
         """Apply OCR to scanned pages"""
         pass
@@ -222,15 +222,15 @@ class TableExtractor:
     """
     def __init__(self):
         self.strategies = ['unstructured', 'pdfplumber', 'camelot']
-        
+
     def extract_tables(self, pdf_path: str, page_range: tuple) -> List[Table]:
         """Extract tables with confidence scores"""
         pass
-        
+
     def classify_table(self, table: Table) -> str:
         """Classify table type using heuristics + LLM"""
         pass
-        
+
     def parse_financial_statement(self, table: Table) -> FinancialData:
         """Parse specific financial statement types"""
         pass
@@ -267,11 +267,11 @@ class SectionMapper:
         'financial': r'FINANCIAL\s+(STATEMENTS?|INFORMATION)',
         # ... more patterns
     }
-    
+
     def build_hierarchy(self, pages: List[Page]) -> SectionTree:
         """Build document section tree"""
         pass
-        
+
     def extract_section_boundaries(self) -> Dict[str, Tuple[int, int]]:
         """Get page ranges for each section"""
         pass
@@ -303,11 +303,11 @@ class EntityExtractor:
     def __init__(self, model_name: str = "dslim/bert-base-NER"):
         self.ner_pipeline = pipeline("ner", model=model_name)
         self.entity_cache = {}
-        
+
     def extract_entities(self, text: str) -> Dict[str, List[str]]:
         """Extract and categorize entities"""
         pass
-        
+
     def resolve_coreferences(self, entities: List[Entity]) -> List[Entity]:
         """Resolve entity mentions to canonical forms"""
         pass
@@ -332,7 +332,7 @@ class FinancialParser:
     def parse_financial_statements(self, tables: List[Table]) -> FinancialData:
         """Parse P&L, Balance Sheet, Cash Flow"""
         pass
-        
+
     def calculate_ratios(self, financials: FinancialData) -> Dict[str, float]:
         """Calculate key financial ratios"""
         ratios = {
@@ -347,7 +347,7 @@ class FinancialParser:
             'contingent_liabilities_to_nw': self.calc_contingent_liabilities_ratio(financials),
         }
         return ratios
-        
+
     def detect_divergences(self, financials: FinancialData) -> List[str]:
         """
         Identify 'Window Dressing' signals:
@@ -384,13 +384,13 @@ class VectorStore:
     def __init__(self, collection_name: str = "rhp_chunks"):
         self.client = QdrantClient(path="./qdrant_storage")
         self.collection_name = collection_name
-        
+
     def create_collection(self):
         self.client.create_collection(
             collection_name=self.collection_name,
             vectors_config=VectorParams(size=1024, distance=Distance.COSINE)
         )
-        
+
     def add_chunks(self, chunks: List[Chunk], embeddings: List[List[float]]):
         """Add document chunks with embeddings"""
         points = [
@@ -408,7 +408,7 @@ class VectorStore:
             for chunk, embedding in zip(chunks, embeddings)
         ]
         self.client.upsert(collection_name=self.collection_name, points=points)
-        
+
     def search(self, query_vector: List[float], filters: Dict, top_k: int = 5):
         """Semantic search with filters"""
         pass
@@ -546,18 +546,18 @@ class AnalysisState(TypedDict):
     # Document info
     document_id: str
     pdf_path: str
-    
+
     # Ingestion outputs
     pages: List[Dict]
     sections: Dict[str, Dict]
     tables: List[Dict]
     entities: Dict[str, List[str]]
     financial_data: Dict[str, Dict]
-    
+
     # Vector search
     chunks: List[Dict]
     embeddings: Optional[List[List[float]]]
-    
+
     # Agent outputs
     architect_analysis: Optional[str]
     valuation_analysis: Optional[str]
@@ -566,14 +566,14 @@ class AnalysisState(TypedDict):
     red_flag_analysis: Optional[str]
     governance_analysis: Optional[str]
     legal_analysis: Optional[str]
-    
+
     # Critique & verification
     self_critique: Optional[str]
     verification_results: Dict[str, bool]
-    
+
     # Final output
     final_report: Optional[str]
-    
+
     # Status & errors
     current_phase: str
     errors: List[str]
@@ -589,7 +589,7 @@ class RHPAnalysisWorkflow:
     def __init__(self):
         self.graph = StateGraph(AnalysisState)
         self._build_graph()
-        
+
     def _build_graph(self):
         # Define nodes
         self.graph.add_node("ingest_pdf", self.ingest_pdf_node)
@@ -608,7 +608,7 @@ class RHPAnalysisWorkflow:
         self.graph.add_node("legal_agent", self.legal_agent_node)
         self.graph.add_node("self_critic_agent", self.self_critic_agent_node)
         self.graph.add_node("generate_report", self.generate_report_node)
-        
+
         # Define edges (workflow sequence)
         self.graph.set_entry_point("ingest_pdf")
         self.graph.add_edge("ingest_pdf", "extract_tables")
@@ -618,22 +618,22 @@ class RHPAnalysisWorkflow:
         self.graph.add_edge("parse_financials", "create_chunks")
         self.graph.add_edge("create_chunks", "generate_embeddings")
         self.graph.add_edge("generate_embeddings", "architect_agent")
-        
+
         # Parallel agent execution (can be sequential too)
         self.graph.add_edge("architect_agent", "forensic_agent")
         self.graph.add_edge("forensic_agent", "red_flag_agent")
         self.graph.add_edge("legal_agent", "valuation_agent")
         self.graph.add_edge("valuation_agent", "utilization_agent")
-        
+
         # Critique and finalization
         self.graph.add_edge("utilization
         # Critique and finalization
         self.graph.add_edge("legal_agent", "self_critic_agent")
         self.graph.add_edge("self_critic_agent", "generate_report")
         self.graph.add_edge("generate_report", END)
-        
+
         self.compiled_graph = self.graph.compile()
-        
+
     def run(self, pdf_path: str) -> Dict:
         """Execute the workflow"""
         initial_state = {
@@ -643,7 +643,7 @@ class RHPAnalysisWorkflow:
             "errors": [],
             "warnings": []
         }
-        
+
         result = self.compiled_graph.invoke(initial_state)
         return result
 ```
@@ -670,7 +670,7 @@ class EmbeddingGenerator:
     """
     def __init__(self, model_name: str = "nomic-ai/nomic-embed-text-v1.5"):
         self.model = SentenceTransformer(model_name)
-        
+
     def generate(self, texts: List[str]) -> List[List[float]]:
         """Generate embeddings with batching"""
         embeddings = self.model.encode(
@@ -701,7 +701,7 @@ class ContextLLM:
     def __init__(self, model_id: str = "Qwen/Qwen2.5-32B-Instruct"):
         self.client = InferenceClient(token=os.getenv("HF_TOKEN"))
         self.model_id = model_id
-        
+
     def generate(self, prompt: str, max_tokens: int = 4096) -> str:
         response = self.client.text_generation(
             prompt,
@@ -728,13 +728,13 @@ class ReasoningLLM:
     def __init__(self, model_id: str = "meta-llama/Llama-3.3-70B-Instruct"):
         self.client = InferenceClient(token=os.getenv("HF_TOKEN"))
         self.model_id = model_id
-        
+
     def analyze(self, prompt: str, system_prompt: str = None) -> str:
         messages = []
         if system_prompt:
             messages.append({"role": "system", "content": system_prompt})
         messages.append({"role": "user", "content": prompt})
-        
+
         response = self.client.chat_completion(
             messages=messages,
             model=self.model_id,
@@ -780,7 +780,7 @@ class LocalSummarizer:
                 model="meta-llama/Llama-3.2-8B-Instruct",
                 device="cuda"  # or "cpu"
             )
-            
+
     def summarize(self, text: str, max_length: int = 200) -> str:
         if hasattr(self, 'client'):
             response = self.client.generate(
@@ -899,30 +899,30 @@ class PromoterExtractor:
     def __init__(self, vector_store: VectorStore, citation_mgr: CitationManager):
         self.vector_store = vector_store
         self.citation_mgr = citation_mgr
-        
+
     def extract_promoters(self, state: AnalysisState) -> List[PromoterDossier]:
         """Extract all promoters with comprehensive details"""
         promoters = []
-        
+
         # 1. Get basic promoter profiles from "Our Promoters" section
         promoter_context = self._retrieve_section("Our Promoters", state)
         basic_profiles = self._parse_promoter_profiles(promoter_context)
-        
+
         # 2. Extract directorships
         directorships = self._extract_directorships(state)
-        
+
         # 3. Extract common pursuits (conflict of interest check)
         common_pursuits = self._extract_common_pursuits(state)
-        
+
         # 4. Extract financial interests
         financial_interests = self._extract_financial_interests(state)
-        
+
         # 5. Extract promoter-specific litigation
         litigation = self._extract_promoter_litigation(state)
-        
+
         # 6. Calculate skin-in-game
         shareholding = self._extract_shareholding(state)
-        
+
         # Merge all data
         for promoter_name in basic_profiles:
             dossier = PromoterDossier(
@@ -940,9 +940,9 @@ class PromoterExtractor:
                 remuneration_last_3_years=financial_interests.get(promoter_name, {}).get('remuneration', [])
             )
             promoters.append(dossier)
-        
+
         return promoters
-    
+
     def _retrieve_section(self, section_name: str, state: AnalysisState) -> List[Chunk]:
         """Retrieve chunks from specific RHP section"""
         query_vector = self._embed_query(section_name)
@@ -952,32 +952,32 @@ class PromoterExtractor:
             top_k=20
         )
         return results
-    
+
     def _parse_promoter_profiles(self, context: List[Chunk]) -> Dict:
         """Use LLM to extract structured promoter profiles"""
         # Implementation using LLM to parse narrative text
         pass
-    
+
     def _extract_directorships(self, state: AnalysisState) -> Dict[str, List[str]]:
         """Extract other directorships for each promoter"""
         # Parse "Other Directorships" tables
         pass
-    
+
     def _extract_common_pursuits(self, state: AnalysisState) -> Dict[str, List[str]]:
         """Extract group companies in same line of business"""
         # Parse "Common Pursuits" section
         pass
-    
+
     def _extract_financial_interests(self, state: AnalysisState) -> Dict:
         """Extract loans, remuneration, guarantees"""
         # Parse "Interest of Promoters", "Payment of Benefits"
         pass
-    
+
     def _extract_promoter_litigation(self, state: AnalysisState) -> Dict[str, List[RiskExposure]]:
         """Extract litigation specific to promoters"""
         # Parse litigation tables, filter by entity = "Promoter"
         pass
-    
+
     def _extract_shareholding(self, state: AnalysisState) -> Dict:
         """Extract pre/post IPO shareholding"""
         # Parse "Shareholding Pattern" tables
@@ -1003,50 +1003,50 @@ class PreIPOInvestorAnalyzer:
     def __init__(self, financial_parser: FinancialParser, citation_mgr: CitationManager):
         self.financial_parser = financial_parser
         self.citation_mgr = citation_mgr
-        
+
     def analyze_investors(self, state: AnalysisState, ipo_details: IPODetails) -> List[PreIPOInvestor]:
         """Analyze all pre-IPO investors"""
         investors = []
-        
+
         # 1. Parse capital structure history
         cap_history = self._parse_capital_structure_history(state)
-        
+
         # 2. Parse OFS details
         ofs_details = self._parse_ofs_details(state)
-        
+
         # 3. Parse lock-in information
         lock_in_schedule = self._parse_lock_in_schedule(state)
-        
+
         # 4. Extract price band
         floor_price = ipo_details.price_band_floor
         cap_price = ipo_details.price_band_cap
-        
+
         # 5. Build investor profiles
         for investor_name, entry_records in cap_history.items():
             # Calculate weighted average entry price
             total_investment = sum(r['shares'] * r['price'] for r in entry_records)
             total_shares = sum(r['shares'] for r in entry_records)
             avg_entry_price = total_investment / total_shares if total_shares > 0 else 0
-            
+
             # Get earliest entry date
             entry_date = min(r['date'] for r in entry_records)
             holding_period = self._calculate_holding_period_months(entry_date)
-            
+
             # Calculate returns
             return_multiple_floor = floor_price / avg_entry_price if avg_entry_price > 0 else 0
             return_multiple_cap = cap_price / avg_entry_price if avg_entry_price > 0 else 0
-            
+
             # Calculate IRR
             irr_floor = self._calculate_irr(avg_entry_price, floor_price, holding_period)
             irr_cap = self._calculate_irr(avg_entry_price, cap_price, holding_period)
-            
+
             # Get OFS participation
             ofs_shares = ofs_details.get(investor_name, {}).get('shares', 0)
             ofs_amount = ofs_shares * cap_price / 10000000  # Convert to Cr
-            
+
             # Get lock-in details
             lock_in_info = lock_in_schedule.get(investor_name, {})
-            
+
             investor = PreIPOInvestor(
                 name=investor_name,
                 category=self._classify_investor(investor_name),
@@ -1065,38 +1065,38 @@ class PreIPOInvestorAnalyzer:
                 shares_locked=lock_in_info.get('locked_shares', 0)
             )
             investors.append(investor)
-        
+
         return investors
-    
+
     def _parse_capital_structure_history(self, state: AnalysisState) -> Dict:
         """Parse equity history tables"""
         # Extract "History of Equity Share Capital" table
         pass
-    
+
     def _parse_ofs_details(self, state: AnalysisState) -> Dict:
         """Parse OFS seller details"""
         # Extract "Offer for Sale" breakdown
         pass
-    
+
     def _parse_lock_in_schedule(self, state: AnalysisState) -> Dict:
         """Parse lock-in requirements"""
         # Extract lock-in table
         pass
-    
+
     def _calculate_holding_period_months(self, entry_date: str) -> int:
         """Calculate months between entry and IPO"""
         from datetime import datetime
         entry = datetime.strptime(entry_date, "%Y-%m-%d")
         now = datetime.now()
         return (now.year - entry.year) * 12 + now.month - entry.month
-    
+
     def _calculate_irr(self, entry_price: float, exit_price: float, months: int) -> float:
         """Calculate annualized IRR"""
         if months == 0 or entry_price == 0:
             return 0.0
         years = months / 12
         return ((exit_price / entry_price) ** (1 / years) - 1) * 100
-    
+
     def _classify_investor(self, name: str) -> str:
         """Classify investor type"""
         name_lower = name.lower()
@@ -1121,48 +1121,48 @@ class FloatCalculator:
     Calculates free float at different time horizons
     """
     def calculate_float_analysis(
-        self, 
+        self,
         ipo_details: IPODetails,
         pre_ipo_investors: List[PreIPOInvestor],
         promoter_dossiers: List[PromoterDossier]
     ) -> FloatAnalysis:
         """Calculate comprehensive float analysis"""
-        
+
         # Get share capital structure
         total_shares_post_issue = ipo_details.shares_post_issue
         fresh_issue_shares = ipo_details.fresh_issue_shares
-        
+
         # Calculate locked shares
-        promoter_locked = sum(p.shareholding_post_ipo * total_shares_post_issue / 100 
+        promoter_locked = sum(p.shareholding_post_ipo * total_shares_post_issue / 100
                              for p in promoter_dossiers)
-        
+
         anchor_locked = ipo_details.anchor_quota_shares if hasattr(ipo_details, 'anchor_quota_shares') else 0
-        
+
         pre_ipo_locked = sum(inv.shares_locked for inv in pre_ipo_investors)
-        
+
         # Day 1 float (only retail + unlocked portion)
         day_1_free = total_shares_post_issue - promoter_locked - anchor_locked - pre_ipo_locked
         day_1_free_percent = (day_1_free / total_shares_post_issue) * 100
-        
+
         # Day 90 (anchor unlocks)
         day_90_free = day_1_free + anchor_locked
         day_90_free_percent = (day_90_free / total_shares_post_issue) * 100
-        
+
         # Build lock-in calendar
         lock_in_calendar = self._build_lock_in_calendar(
-            promoter_dossiers, 
-            pre_ipo_investors, 
+            promoter_dossiers,
+            pre_ipo_investors,
             anchor_locked,
             total_shares_post_issue
         )
-        
+
         # Retail quota shares
         retail_shares = ipo_details.retail_quota_shares if hasattr(ipo_details, 'retail_quota_shares') else 0
         retail_percent = (retail_shares / total_shares_post_issue) * 100
-        
+
         # Implied daily volume (assume 250 trading days)
         implied_daily = day_1_free / 250
-        
+
         float_analysis = FloatAnalysis(
             total_shares_post_issue=total_shares_post_issue,
             fresh_issue_shares=fresh_issue_shares,
@@ -1178,13 +1178,13 @@ class FloatCalculator:
             implied_daily_volume=implied_daily,
             lock_in_calendar=lock_in_calendar
         )
-        
+
         return float_analysis
-    
+
     def _build_lock_in_calendar(self, promoters, investors, anchor_shares, total_shares) -> List[Dict]:
         """Build timeline of lock-in expiries"""
         calendar = []
-        
+
         # Anchor unlock at 90 days
         if anchor_shares > 0:
             calendar.append({
@@ -1193,7 +1193,7 @@ class FloatCalculator:
                 'investor': 'Anchor Investors',
                 'percent_of_float': (anchor_shares / total_shares) * 100
             })
-        
+
         # Pre-IPO investor unlocks
         for inv in investors:
             if inv.shares_locked > 0 and inv.lock_in_expiry_date:
@@ -1203,7 +1203,7 @@ class FloatCalculator:
                     'investor': inv.name,
                     'percent_of_float': (inv.shares_locked / total_shares) * 100
                 })
-        
+
         # Sort by date
         calendar.sort(key=lambda x: x['date'])
         return calendar
@@ -1224,33 +1224,33 @@ class OrderBookAnalyzer:
     def __init__(self, vector_store: VectorStore, citation_mgr: CitationManager):
         self.vector_store = vector_store
         self.citation_mgr = citation_mgr
-        
+
     def analyze_order_book(self, state: AnalysisState, sector: str) -> OrderBookAnalysis:
         """Extract and analyze order book if applicable"""
-        
+
         # Check if sector typically has order book disclosure
-        applicable_sectors = ['EPC', 'Defense', 'Infrastructure', 'IT Services', 
+        applicable_sectors = ['EPC', 'Defense', 'Infrastructure', 'IT Services',
                             'Capital Goods', 'Engineering', 'Construction']
-        
+
         if not any(s.lower() in sector.lower() for s in applicable_sectors):
             return OrderBookAnalysis(applicable=False)
-        
+
         # Search for order book section
         order_book_context = self.vector_store.search(
             query_vector=self._embed_query("order book unexecuted orders outstanding"),
             filters={},
             top_k=10
         )
-        
+
         if not order_book_context:
             return OrderBookAnalysis(applicable=True)  # Expected but not found
-        
+
         # Extract order book metrics using LLM
         extracted_data = self._extract_order_book_data(order_book_context)
-        
+
         # Get latest revenue for ratio calculation
         ltm_revenue = state['financial_data'].get('latest_revenue', 0)
-        
+
         analysis = OrderBookAnalysis(
             applicable=True,
             total_order_book=extracted_data.get('total', 0),
@@ -1261,17 +1261,17 @@ class OrderBookAnalyzer:
             government_orders_percent=extracted_data.get('govt_percent', 0),
             order_book_1yr_ago=extracted_data.get('prior_year', None)
         )
-        
+
         # Calculate derived metrics
         if analysis.total_order_book > 0:
             analysis.top_5_orders_concentration = (analysis.top_5_orders_value / analysis.total_order_book) * 100
             analysis.executable_in_12_months_percent = (analysis.executable_in_12_months / analysis.total_order_book) * 100
-        
+
         if analysis.order_book_1yr_ago:
             analysis.order_book_growth_yoy = ((analysis.total_order_book / analysis.order_book_1yr_ago) - 1) * 100
-        
+
         return analysis
-    
+
     def _extract_order_book_data(self, context: List[Chunk]) -> Dict:
         """Use LLM to extract structured order book data"""
         # Implementation with LLM
@@ -1290,30 +1290,30 @@ class DebtStructureAnalyzer:
     """
     def analyze_debt(self, state: AnalysisState, objects_analysis: ObjectsOfIssueAnalysis) -> DebtStructure:
         """Comprehensive debt structure analysis"""
-        
+
         # Extract indebtedness section
         debt_context = self._retrieve_section("Indebtedness", state)
-        
+
         # Parse debt tables
         debt_data = self._parse_debt_tables(debt_context)
-        
+
         # Get debt from financial statements
         financials = state['financial_data']
         total_debt = financials.get('latest_total_debt', 0)
-        
+
         # Calculate post-IPO debt
         debt_repayment = objects_analysis.debt_repayment_amount
         post_ipo_debt = total_debt - debt_repayment
-        
+
         # Extract interest rates from notes
         interest_rates = self._extract_interest_rates(debt_context)
-        
+
         # Parse maturity profile
         maturity = self._parse_maturity_profile(debt_data)
-        
+
         # Extract covenants from material contracts
         covenants = self._extract_covenants(state)
-        
+
         debt_structure = DebtStructure(
             total_debt=total_debt,
             secured_debt=debt_data.get('secured', 0),
@@ -1332,29 +1332,29 @@ class DebtStructureAnalyzer:
             has_financial_covenants=len(covenants) > 0,
             covenant_details=covenants
         )
-        
+
         # Calculate ratios
         equity = financials.get('latest_equity', 0)
         ebitda = financials.get('latest_ebitda', 0)
-        
+
         debt_structure.debt_to_equity_pre_ipo = total_debt / equity if equity > 0 else 0
         debt_structure.debt_to_equity_post_ipo = post_ipo_debt / (equity + objects_analysis.fresh_issue) if equity > 0 else 0
         debt_structure.debt_to_ebitda = total_debt / ebitda if ebitda > 0 else 0
-        
+
         return debt_structure
-    
+
     def _parse_debt_tables(self, context: List[Chunk]) -> Dict:
         """Parse indebtedness tables"""
         pass
-    
+
     def _extract_interest_rates(self, context: List[Chunk]) -> Dict:
         """Extract interest rate information"""
         pass
-    
+
     def _parse_maturity_profile(self, debt_data: Dict) -> Dict:
         """Parse debt maturity schedule"""
         pass
-    
+
     def _extract_covenants(self, state: AnalysisState) -> List[str]:
         """Extract financial covenants from material contracts"""
         pass
@@ -1372,64 +1372,64 @@ class EnhancedCashFlowAnalyzer:
     """
     def __init__(self, financial_parser: FinancialParser):
         self.financial_parser = financial_parser
-        
+
     def analyze_cash_flows(self, financials: List[FinancialData], ipo_details: IPODetails) -> List[CashFlowAnalysis]:
         """Analyze cash flows for each fiscal year"""
         analyses = []
-        
+
         for financial_data in financials:
             # Extract core cash flows
             cfo = financial_data.cash_flow_operations or 0
             cfi = financial_data.cash_flow_investing or 0
             cff = financial_data.cash_flow_financing or 0
-            
+
             # Extract capex (usually negative in CFI)
             capex = abs(financial_data.capex or 0)
-            
+
             # Calculate FCF
             fcf = cfo - capex
-            
+
             # Get revenue and EBITDA
             revenue = financial_data.revenue or 0
             ebitda = financial_data.ebitda or 0
             pat = financial_data.pat or 0
-            
+
             # Calculate depreciation
             depreciation = financial_data.depreciation or 0
-            
+
             # Capex intensity
             capex_to_revenue = (capex / revenue * 100) if revenue > 0 else 0
             capex_to_depreciation = (capex / depreciation) if depreciation > 0 else 0
-            
+
             # Categorize capex
             maintenance_capex = depreciation  # Proxy
             growth_capex = max(0, capex - depreciation)
-            
+
             # FCF metrics
             fcf_margin = (fcf / revenue * 100) if revenue > 0 else 0
-            
+
             # Market cap for FCF yield
             market_cap_floor = ipo_details.market_cap_at_floor if hasattr(ipo_details, 'market_cap_at_floor') else 0
             market_cap_cap = ipo_details.market_cap_at_cap if hasattr(ipo_details, 'market_cap_at_cap') else 0
-            
+
             fcf_yield_floor = (fcf / market_cap_floor * 100) if market_cap_floor > 0 else None
             fcf_yield_cap = (fcf / market_cap_cap * 100) if market_cap_cap > 0 else None
-            
+
             # Cash burn analysis (for negative FCF companies)
             is_cash_burning = fcf < 0
             monthly_burn = abs(fcf) / 12 if is_cash_burning else 0
-            
+
             cash_balance = financial_data.cash_and_equivalents or 0
             runway_months = (cash_balance / monthly_burn) if monthly_burn > 0 else float('inf')
-            
+
             # Quality metrics
             cfo_to_ebitda = (cfo / ebitda * 100) if ebitda > 0 else 0
             cfo_to_pat = (cfo / pat * 100) if pat > 0 else 0
-            
+
             # Working capital change
             wc_change = financial_data.working_capital_change or 0
             wc_change_to_revenue = (wc_change / revenue * 100) if revenue > 0 else 0
-            
+
             analysis = CashFlowAnalysis(
                 fiscal_year=financial_data.fiscal_year,
                 cfo=cfo,
@@ -1454,9 +1454,9 @@ class EnhancedCashFlowAnalyzer:
                 cfo_to_pat=cfo_to_pat,
                 cash_and_equivalents=cash_balance
             )
-            
+
             analyses.append(analysis)
-        
+
         return analyses
 ```
 
@@ -1483,46 +1483,46 @@ class WorkingCapitalAnalyzer:
         'Cement': {'receivable_days': 30, 'inventory_days': 30, 'ccc': 40},
         'Chemicals': {'receivable_days': 60, 'inventory_days': 75, 'ccc': 110}
     }
-    
+
     def analyze_working_capital(
-        self, 
-        financials: List[FinancialData], 
+        self,
+        financials: List[FinancialData],
         sector: str
     ) -> List[WorkingCapitalAnalysis]:
         """Analyze working capital for each year"""
         analyses = []
-        
+
         # Get sector benchmarks
         sector_benchmarks = self._get_sector_benchmarks(sector)
-        
+
         for i, financial_data in enumerate(financials):
             # Calculate days
             revenue = financial_data.revenue or 0
             cogs = financial_data.cost_of_goods_sold or (revenue * 0.7)  # Estimate if not available
-            
+
             inventory = financial_data.inventory or 0
             receivables = financial_data.trade_receivables or 0
             payables = financial_data.trade_payables or 0
-            
+
             inventory_days = (inventory / cogs * 365) if cogs > 0 else 0
             receivable_days = (receivables / revenue * 365) if revenue > 0 else 0
             payable_days = (payables / cogs * 365) if cogs > 0 else 0
-            
+
             ccc = inventory_days + receivable_days - payable_days
-            
+
             # Net working capital
             current_assets = financial_data.current_assets or 0
             current_liabilities = financial_data.current_liabilities or 0
             nwc = current_assets - current_liabilities
             nwc_to_revenue = (nwc / revenue * 100) if revenue > 0 else 0
-            
+
             # YoY trends
             if i > 0:
                 prior = analyses[i-1]
                 receivable_days_change = receivable_days - prior.receivable_days
                 inventory_days_change = inventory_days - prior.inventory_days
                 ccc_change = ccc - prior.cash_conversion_cycle
-                
+
                 # Red flag: receivables growing faster than revenue
                 revenue_growth = ((revenue / financials[i-1].revenue) - 1) * 100 if financials[i-1].revenue > 0 else 0
                 receivable_growth = ((receivables / financials[i-1].trade_receivables) - 1) * 100 if financials[i-1].trade_receivables > 0 else 0
@@ -1532,16 +1532,16 @@ class WorkingCapitalAnalyzer:
                 inventory_days_change = 0
                 ccc_change = 0
                 receivable_vs_revenue_growth = 0
-            
+
             # Red flags
             is_receivable_days_worsening = receivable_days_change > 10  # More than 10 days increase
             is_inventory_piling = inventory_days_change > 15
-            
+
             # vs Sector
             vs_sector_ccc = None
             if sector_benchmarks:
                 vs_sector_ccc = ccc - sector_benchmarks['ccc']
-            
+
             analysis = WorkingCapitalAnalysis(
                 fiscal_year=financial_data.fiscal_year,
                 inventory_days=inventory_days,
@@ -1565,11 +1565,11 @@ class WorkingCapitalAnalyzer:
                 sector_avg_ccc=sector_benchmarks.get('ccc') if sector_benchmarks else None,
                 vs_sector_ccc=vs_sector_ccc
             )
-            
+
             analyses.append(analysis)
-        
+
         return analyses
-    
+
     def _get_sector_benchmarks(self, sector: str) -> Optional[Dict]:
         """Get sector benchmarks"""
         for key in self.SECTOR_BENCHMARKS:
@@ -1598,30 +1598,30 @@ class ContingentLiabilityCategorizer:
         'regulatory': 0.4,  # Depends on nature
         'labor': 0.3
     }
-    
+
     def analyze_contingent_liabilities(
-        self, 
+        self,
         state: AnalysisState,
         net_worth: float,
         objects_analysis: ObjectsOfIssueAnalysis
     ) -> ContingentLiabilityAnalysis:
         """Categorize and analyze contingent liabilities"""
-        
+
         # Extract contingent liability section
         cl_context = self._retrieve_section("Contingent Liabilities", state)
-        
+
         # Parse contingent liability notes
         cl_data = self._parse_contingent_liabilities(cl_context)
-        
+
         # Initialize analysis
         analysis = ContingentLiabilityAnalysis()
-        
+
         # Categorize each item
         for item in cl_data:
             category = self._categorize_liability(item)
             amount = item['amount']
             count = item.get('count', 1)
-            
+
             # Add to appropriate category
             if category == 'tax':
                 analysis.tax_disputes += amount
@@ -1642,14 +1642,14 @@ class ContingentLiabilityCategorizer:
                 analysis.labor_disputes += amount
             else:
                 analysis.other += amount
-            
+
             # Check timeline risk
             if item.get('hearing_date'):
                 hearing_date = item['hearing_date']
                 if self._is_within_12_months(hearing_date):
                     analysis.matters_with_hearing_in_12_months += 1
                     analysis.amount_at_risk_in_12_months += amount
-            
+
             # Create RiskExposure object
             risk_exposure = RiskExposure(
                 entity="Company",  # Will be updated if promoter/subsidiary
@@ -1662,7 +1662,7 @@ class ContingentLiabilityCategorizer:
                 citation=item.get('citation', '')
             )
             analysis.items.append(risk_exposure)
-        
+
         # Calculate totals
         analysis.total_contingent_liabilities = sum([
             analysis.tax_disputes,
@@ -1674,36 +1674,36 @@ class ContingentLiabilityCategorizer:
             analysis.labor_disputes,
             analysis.other
         ])
-        
+
         analysis.total_as_percent_networth = (analysis.total_contingent_liabilities / net_worth * 100) if net_worth > 0 else 0
-        
+
         # Probability-weighted exposure
         analysis.high_probability_exposure = (
             analysis.environmental * self.PROBABILITY_WEIGHTS['environmental'] +
             analysis.legal_civil * self.PROBABILITY_WEIGHTS['legal_civil']
         )
-        
+
         analysis.medium_probability_exposure = (
             analysis.tax_disputes * self.PROBABILITY_WEIGHTS['tax'] +
             analysis.regulatory_fines * self.PROBABILITY_WEIGHTS['regulatory'] +
             analysis.labor_disputes * self.PROBABILITY_WEIGHTS['labor']
         )
-        
+
         analysis.low_probability_exposure = (
             analysis.bank_guarantees * self.PROBABILITY_WEIGHTS['bank_guarantee'] +
             analysis.legal_criminal * self.PROBABILITY_WEIGHTS['legal_criminal']
         )
-        
+
         # Check if IPO proceeds earmarked for settlement
         # This would come from Objects of Issue analysis
         analysis.amount_earmarked_from_ipo = 0  # To be filled if disclosed
-        
+
         return analysis
-    
+
     def _categorize_liability(self, item: Dict) -> str:
         """Categorize liability based on description"""
         description = item.get('description', '').lower()
-        
+
         if any(kw in description for kw in ['income tax', 'gst', 'service tax', 'customs', 'excise']):
             return 'tax'
         elif any(kw in description for kw in ['bank guarantee', 'letter of credit']):
@@ -1718,21 +1718,21 @@ class ContingentLiabilityCategorizer:
             return 'legal_criminal'
         else:
             return 'legal_civil'
-    
+
     def _assess_severity(self, amount: float, net_worth: float) -> str:
         """Assess severity based on % of net worth"""
         if net_worth == 0:
             return 'high'
-        
+
         percent = (amount / net_worth) * 100
-        
+
         if percent > 5:
             return 'high'
         elif percent > 2:
             return 'medium'
         else:
             return 'low'
-    
+
     def _is_within_12_months(self, date_str: str) -> bool:
         """Check if date is within next 12 months"""
         from datetime import datetime, timedelta
@@ -1742,11 +1742,11 @@ class ContingentLiabilityCategorizer:
             return hearing_date <= twelve_months_out
         except:
             return False
-    
+
     def _retrieve_section(self, section: str, state: AnalysisState) -> List[Chunk]:
         """Retrieve section chunks"""
         pass
-    
+
     def _parse_contingent_liabilities(self, context: List[Chunk]) -> List[Dict]:
         """Parse contingent liability notes"""
         pass
@@ -1764,30 +1764,30 @@ class ObjectsOfIssueTracker:
     """
     def analyze_objects(self, state: AnalysisState, ipo_details: IPODetails) -> ObjectsOfIssueAnalysis:
         """Comprehensive use of proceeds analysis"""
-        
+
         # Extract Objects of the Issue section
         objects_context = self._retrieve_section("Objects of the Issue", state)
-        
+
         # Parse use of proceeds table
         use_breakdown = self._parse_use_of_proceeds(objects_context)
-        
+
         # Calculate percentages
         fresh_issue = ipo_details.fresh_issue_cr
         ofs = ipo_details.ofs_cr
         total_issue = fresh_issue + ofs
-        
+
         fresh_percent = (fresh_issue / total_issue * 100) if total_issue > 0 else 0
         ofs_percent = (ofs / total_issue * 100) if total_issue > 0 else 0
-        
+
         # Parse deployment timeline
         deployment_schedule = self._parse_deployment_schedule(objects_context)
-        
+
         # Check readiness indicators
         readiness = self._check_readiness_indicators(objects_context)
-        
+
         # Check for monitoring agency
         has_monitoring = self._check_monitoring_agency(objects_context)
-        
+
         analysis = ObjectsOfIssueAnalysis(
             total_issue_size=total_issue,
             fresh_issue=fresh_issue,
@@ -1807,7 +1807,7 @@ class ObjectsOfIssueTracker:
             has_monitoring_agency=has_monitoring,
             monitoring_agency_name=readiness.get('monitoring_agency')
         )
-        
+
         # Calculate percentages of fresh issue
         if fresh_issue > 0:
             analysis.capex_percent = (analysis.capex_amount / fresh_issue) * 100
@@ -1816,30 +1816,30 @@ class ObjectsOfIssueTracker:
             analysis.acquisition_percent = (analysis.acquisition_amount / fresh_issue) * 100
             analysis.gcp_percent = (analysis.general_corporate_purposes / fresh_issue) * 100
             analysis.issue_expenses_percent = (analysis.issue_expenses / fresh_issue) * 100
-        
+
         # Assessments
         analysis.is_growth_oriented = analysis.capex_amount > analysis.debt_repayment_amount
         analysis.is_exit_oriented = ofs > fresh_issue
         analysis.is_deleveraging = analysis.debt_repayment_amount > (fresh_issue * 0.5)
-        
+
         # Red flags
         analysis.gcp_exceeds_25_percent = analysis.gcp_percent > 25
         analysis.vague_deployment_timeline = len(deployment_schedule) == 0
-        
+
         return analysis
-    
+
     def _parse_use_of_proceeds(self, context: List[Chunk]) -> Dict:
         """Parse use of proceeds breakdown"""
         pass
-    
+
     def _parse_deployment_schedule(self, context: List[Chunk]) -> List[Dict]:
         """Parse FY-wise deployment schedule"""
         pass
-    
+
     def _check_readiness_indicators(self, context: List[Chunk]) -> Dict:
         """Check if land acquired, approvals in place, etc."""
         pass
-    
+
     def _check_monitoring_agency(self, context: List[Chunk]) -> bool:
         """Check if monitoring agency appointed"""
         pass
@@ -1856,68 +1856,68 @@ class StubPeriodAnalyzer:
     Analyzes stub period (interim) financials
     """
     def analyze_stub_period(
-        self, 
+        self,
         state: AnalysisState,
         full_year_financials: List[FinancialData]
     ) -> Optional[StubPeriodAnalysis]:
         """Analyze stub period if available"""
-        
+
         # Check if stub period exists
         stub_data = self._extract_stub_period(state)
-        
+
         if not stub_data:
             return None  # No stub period disclosed
-        
+
         # Get comparable prior period
         prior_data = self._extract_comparable_prior_period(state, stub_data['period'])
-        
+
         if not prior_data:
             return None
-        
+
         # Extract metrics
         stub_revenue = stub_data.get('revenue', 0)
         stub_ebitda = stub_data.get('ebitda', 0)
         stub_pat = stub_data.get('pat', 0)
-        
+
         prior_revenue = prior_data.get('revenue', 0)
         prior_ebitda = prior_data.get('ebitda', 0)
         prior_pat = prior_data.get('pat', 0)
-        
+
         # Calculate margins
         stub_ebitda_margin = (stub_ebitda / stub_revenue * 100) if stub_revenue > 0 else 0
         stub_pat_margin = (stub_pat / stub_revenue * 100) if stub_revenue > 0 else 0
-        
+
         prior_ebitda_margin = (prior_ebitda / prior_revenue * 100) if prior_revenue > 0 else 0
         prior_pat_margin = (prior_pat / prior_revenue * 100) if prior_revenue > 0 else 0
-        
+
         # YoY growth
         revenue_growth = ((stub_revenue / prior_revenue) - 1) * 100 if prior_revenue > 0 else 0
         ebitda_growth = ((stub_ebitda / prior_ebitda) - 1) * 100 if prior_ebitda > 0 else 0
         pat_growth = ((stub_pat / prior_pat) - 1) * 100 if prior_pat > 0 else 0
-        
+
         margin_expansion = stub_ebitda_margin - prior_ebitda_margin
-        
+
         # Annualize stub period
         months = stub_data.get('months', 6)
         annualization_factor = 12 / months
-        
+
         annualized_revenue = stub_revenue * annualization_factor
         annualized_ebitda = stub_ebitda * annualization_factor
         annualized_pat = stub_pat * annualization_factor
-        
+
         # Compare to last full year
         last_fy = full_year_financials[-1] if full_year_financials else None
         last_fy_revenue = last_fy.revenue if last_fy else 0
-        
+
         implied_fy_growth = ((annualized_revenue / last_fy_revenue) - 1) * 100 if last_fy_revenue > 0 else 0
-        
+
         # Calculate historical CAGR
         historical_cagr = self._calculate_historical_cagr(full_year_financials)
-        
+
         # Warning flags
         stub_below_cagr = revenue_growth < historical_cagr
         margin_compression = margin_expansion < -2  # More than 2% margin drop
-        
+
         analysis = StubPeriodAnalysis(
             stub_period=stub_data['period'],
             comparable_prior_period=prior_data['period'],
@@ -1943,26 +1943,26 @@ class StubPeriodAnalyzer:
             stub_growth_below_historical_cagr=stub_below_cagr,
             margin_compression_in_stub=margin_compression
         )
-        
+
         return analysis
-    
+
     def _extract_stub_period(self, state: AnalysisState) -> Optional[Dict]:
         """Extract stub period financials from RHP"""
         pass
-    
+
     def _extract_comparable_prior_period(self, state: AnalysisState, stub_period: str) -> Optional[Dict]:
         """Extract comparable prior year period"""
         pass
-    
+
     def _calculate_historical_cagr(self, financials: List[FinancialData]) -> float:
         """Calculate historical revenue CAGR"""
         if len(financials) < 2:
             return 0.0
-        
+
         first_revenue = financials[0].revenue
         last_revenue = financials[-1].revenue
         years = len(financials) - 1
-        
+
         if first_revenue > 0 and years > 0:
             cagr = ((last_revenue / first_revenue) ** (1 / years) - 1) * 100
             return cagr
@@ -2014,7 +2014,7 @@ class Table:
     headers: List[str]
     table_type: Optional[str] = None  # 'financial', 'shareholding', etc.
     confidence: float = 0.0
-    
+
 @dataclass
 class Section:
     """Represents a document section"""
@@ -2026,7 +2026,7 @@ class Section:
     subsections: List['Section'] = field(default_factory=list)
     content: str = ""
     word_count: int = 0
-    
+
 @dataclass
 class Chunk:
     """Represents a semantic chunk"""
@@ -2063,7 +2063,7 @@ class FinancialData:
     total_debt: Optional[float] = None
     current_assets: Optional[float] = None
     current_liabilities: Optional[float] = None
-    
+
     # Calculated ratios
     roe: Optional[float] = None
     roce: Optional[float] = None
@@ -2142,12 +2142,12 @@ class Report:
     document_id: str
     company_name: str
     generated_at: datetime
-    
+
     # Executive summary
     tldr: str  # 200-300 words
     investment_thesis: List[str]
     key_risks: List[str]
-    
+
     # Detailed sections
     business_overview: str
     financial_analysis: str
@@ -2158,7 +2158,7 @@ class Report:
     projection_scenarios: List[ProjectionScenario]
     valuation_snapshots: List[ValuationSnapshot]
     citations: List[CitationRecord]
-    
+
     # Metadata
     confidence_score: float
     page_count: int
@@ -2222,12 +2222,12 @@ class PromoterDossier:
     qualification: Optional[str] = None
     experience_years: Optional[int] = None
     designation: Optional[str] = None  # MD, Chairman, etc.
-    
+
     # Directorships & Conflicts
     other_directorships: List[str] = field(default_factory=list)  # From "Other Directorships"
     group_companies_in_same_line: List[str] = field(default_factory=list)  # Conflict of interest
     common_pursuits: List[str] = field(default_factory=list)  # From "Common Pursuits" section
-    
+
     # Financial Interest
     shareholding_pre_ipo: float = 0.0
     shareholding_post_ipo: float = 0.0
@@ -2236,18 +2236,18 @@ class PromoterDossier:
     guarantees_given: float = 0.0  # ₹ Cr
     remuneration_last_3_years: List[float] = field(default_factory=list)
     other_benefits: List[str] = field(default_factory=list)  # Perquisites, ESOPs
-    
+
     # Litigation specific to promoter
     litigation_as_defendant: List['RiskExposure'] = field(default_factory=list)
     criminal_cases: int = 0
     civil_cases: int = 0
     regulatory_actions: int = 0
     total_litigation_amount: float = 0.0  # ₹ Cr
-    
+
     # Track record signals
     past_ventures_mentioned: List[str] = field(default_factory=list)
     disqualifications: bool = False
-    
+
     # Computed metrics
     skin_in_game_post_ipo: float = 0.0  # Post-IPO holding value at cap price
 
@@ -2256,28 +2256,28 @@ class PreIPOInvestor:
     """Pre-IPO investor details for exit analysis"""
     name: str
     category: str  # "Promoter", "PE/VC", "Angel", "ESOP Trust", "Strategic", "HNI"
-    
+
     # Entry details
     entry_date: Optional[str] = None
     entry_price: float = 0.0
     shares_acquired: int = 0
     investment_amount: float = 0.0  # ₹ Cr
-    
+
     # Current holding
     shares_held_pre_ipo: int = 0
     holding_percent_pre_ipo: float = 0.0
-    
+
     # OFS participation
     shares_selling_via_ofs: int = 0
     ofs_amount: float = 0.0  # ₹ Cr at cap price
-    
+
     # Return calculations
     implied_return_multiple_at_floor: float = 0.0  # Issue floor / Entry price
     implied_return_multiple_at_cap: float = 0.0
     implied_irr_at_floor: Optional[float] = None  # Annualized return
     implied_irr_at_cap: Optional[float] = None
     holding_period_months: Optional[int] = None
-    
+
     # Lock-in details
     lock_in_period: str = ""  # "6 months", "1 year", "3 years"
     lock_in_expiry_date: Optional[str] = None
@@ -2290,26 +2290,26 @@ class FloatAnalysis:
     # Share capital structure
     total_shares_post_issue: int = 0
     fresh_issue_shares: int = 0
-    
+
     # Lock-in breakdown
     promoter_locked_shares: int = 0  # 3-year lock-in
     promoter_locked_percent: float = 0.0
     anchor_locked_shares: int = 0  # 90-day lock-in
     pre_ipo_locked_shares: int = 0  # 6-month / 1-year
     esop_unvested_shares: int = 0
-    
+
     # Float calculations
     day_1_free_float_shares: int = 0
     day_1_free_float_percent: float = 0.0
     day_90_free_float_percent: float = 0.0  # Post anchor unlock
     day_180_free_float_percent: float = 0.0  # Post 6-month unlock
     year_1_free_float_percent: float = 0.0
-    
+
     # Liquidity indicators
     retail_quota_shares: int = 0
     retail_quota_percent: float = 0.0
     implied_daily_volume: float = 0.0  # Free float / 250
-    
+
     # Lock-in expiry calendar
     lock_in_calendar: List[Dict] = field(default_factory=list)  # [{date, shares_unlocking, investor, %_of_float}]
 
@@ -2317,35 +2317,35 @@ class FloatAnalysis:
 class OrderBookAnalysis:
     """Order book / revenue visibility for B2B companies"""
     applicable: bool = False  # Set True for EPC, Defense, IT Services, Capital Goods
-    
+
     # Order book metrics
     total_order_book: float = 0.0  # ₹ Cr
     order_book_as_of_date: Optional[str] = None
     order_book_to_ltm_revenue: float = 0.0  # "X times" or "Y months of revenue"
-    
+
     # Order book composition
     top_5_orders_value: float = 0.0  # ₹ Cr
     top_5_orders_concentration: float = 0.0  # % of total order book
     largest_single_order: float = 0.0  # ₹ Cr
     largest_single_order_percent: float = 0.0
-    
+
     # Execution timeline
     executable_in_12_months: float = 0.0  # ₹ Cr
     executable_in_12_months_percent: float = 0.0
     average_order_tenure_months: Optional[int] = None
-    
+
     # Trend
     order_book_1yr_ago: Optional[float] = None
     order_book_growth_yoy: Optional[float] = None
     order_inflow_ltm: Optional[float] = None  # Last 12 months new orders
     book_to_bill_ratio: Optional[float] = None  # Order inflow / Revenue
-    
+
     # Quality indicators
     government_orders_percent: float = 0.0
     private_orders_percent: float = 0.0
     export_orders_percent: float = 0.0
     repeat_customer_orders_percent: float = 0.0
-    
+
     citations: List[str] = field(default_factory=list)
 
 @dataclass
@@ -2357,78 +2357,78 @@ class DebtStructure:
     unsecured_debt: float = 0.0
     short_term_debt: float = 0.0  # < 1 year
     long_term_debt: float = 0.0
-    
+
     # Cost of debt
     weighted_avg_interest_rate: Optional[float] = None
     highest_interest_rate: Optional[float] = None
     lowest_interest_rate: Optional[float] = None
-    
+
     # Maturity profile
     maturing_within_1_year: float = 0.0
     maturing_1_to_3_years: float = 0.0
     maturing_3_to_5_years: float = 0.0
     maturing_beyond_5_years: float = 0.0
-    
+
     # Lender concentration
     top_lender: Optional[str] = None
     top_lender_exposure: float = 0.0  # ₹ Cr
     number_of_lenders: int = 0
-    
+
     # Covenants & restrictions (from Material Contracts)
     has_financial_covenants: bool = False
     covenant_details: List[str] = field(default_factory=list)
     covenant_breaches_disclosed: bool = False
-    
+
     # IPO proceeds for debt
     debt_repayment_from_ipo: float = 0.0  # ₹ Cr from Objects of Issue
     debt_repayment_percent_of_fresh_issue: float = 0.0
     post_ipo_debt: float = 0.0  # Net debt after IPO proceeds
-    
+
     # Key ratios
     debt_to_equity_pre_ipo: float = 0.0
     debt_to_equity_post_ipo: float = 0.0
     interest_coverage_ratio: Optional[float] = None
     debt_to_ebitda: Optional[float] = None
-    
+
     citations: List[str] = field(default_factory=list)
 
 @dataclass
 class CashFlowAnalysis:
     """Enhanced cash flow and liquidity analysis"""
     fiscal_year: str
-    
+
     # Core cash flows
     cfo: float = 0.0  # Cash Flow from Operations
     cfi: float = 0.0  # Cash Flow from Investing
     cff: float = 0.0  # Cash Flow from Financing
     net_cash_flow: float = 0.0
-    
+
     # Free Cash Flow metrics
     capex: float = 0.0
     fcf: float = 0.0  # CFO - Capex
     fcf_margin: float = 0.0  # FCF / Revenue
     fcf_yield_at_floor: Optional[float] = None  # FCF / Market Cap at floor
     fcf_yield_at_cap: Optional[float] = None
-    
+
     # Cash burn analysis (for loss-making companies)
     is_cash_burning: bool = False
     monthly_cash_burn: float = 0.0  # Average monthly burn
     runway_months: float = 0.0  # Cash / Monthly burn
-    
+
     # Capex analysis
     capex_to_revenue: float = 0.0  # Capex intensity
     capex_to_depreciation: float = 0.0  # >1 = growth capex, ~1 = maintenance
     maintenance_capex_estimate: float = 0.0  # ≈ Depreciation
     growth_capex_estimate: float = 0.0  # Capex - Depreciation
-    
+
     # Working capital changes
     wc_change: float = 0.0
     wc_change_to_revenue: float = 0.0
-    
+
     # Quality indicators
     cfo_to_ebitda: float = 0.0  # Should be > 0.7 for quality earnings
     cfo_to_pat: float = 0.0  # Cash conversion
-    
+
     # Cash position
     cash_and_equivalents: float = 0.0
     cash_to_current_liabilities: float = 0.0
@@ -2437,30 +2437,30 @@ class CashFlowAnalysis:
 class WorkingCapitalAnalysis:
     """Detailed working capital cycle analysis"""
     fiscal_year: str
-    
+
     # Days calculations
     inventory_days: float = 0.0
     receivable_days: float = 0.0
     payable_days: float = 0.0
     cash_conversion_cycle: float = 0.0  # Inv + Recv - Payable
-    
+
     # Absolute values
     inventory: float = 0.0  # ₹ Cr
     trade_receivables: float = 0.0
     trade_payables: float = 0.0
     net_working_capital: float = 0.0
     nwc_to_revenue: float = 0.0  # Working capital intensity
-    
+
     # Trend analysis
     receivable_days_change_yoy: float = 0.0
     inventory_days_change_yoy: float = 0.0
     ccc_change_yoy: float = 0.0
-    
+
     # Red flag checks
     receivable_growth_vs_revenue_growth: float = 0.0  # If >> 0, potential channel stuffing
     is_receivable_days_worsening: bool = False
     is_inventory_piling: bool = False
-    
+
     # Sector benchmark (to be populated based on sector)
     sector: Optional[str] = None
     sector_avg_receivable_days: Optional[float] = None
@@ -2473,7 +2473,7 @@ class ContingentLiabilityAnalysis:
     """Categorized contingent liability analysis"""
     total_contingent_liabilities: float = 0.0  # ₹ Cr
     total_as_percent_networth: float = 0.0
-    
+
     # Category-wise breakdown
     tax_disputes: float = 0.0  # GST, Income Tax, Customs
     tax_disputes_count: int = 0
@@ -2486,25 +2486,25 @@ class ContingentLiabilityAnalysis:
     regulatory_fines: float = 0.0  # SEBI, RBI, sector regulators
     labor_disputes: float = 0.0
     other: float = 0.0
-    
+
     # Probability-weighted exposure
     high_probability_exposure: float = 0.0  # Likely to crystallize
     medium_probability_exposure: float = 0.0
     low_probability_exposure: float = 0.0
-    
+
     # Timeline risk
     matters_with_hearing_in_12_months: int = 0
     amount_at_risk_in_12_months: float = 0.0
-    
+
     # Settlement from IPO proceeds
     amount_earmarked_from_ipo: float = 0.0
-    
+
     # Detailed items
     items: List['RiskExposure'] = field(default_factory=list)
-    
+
     citations: List[str] = field(default_factory=list)
 
-@dataclass 
+@dataclass
 class ObjectsOfIssueAnalysis:
     """Detailed use of proceeds analysis with deployment timeline"""
     # Issue structure
@@ -2513,7 +2513,7 @@ class ObjectsOfIssueAnalysis:
     ofs: float = 0.0
     fresh_issue_percent: float = 0.0
     ofs_percent: float = 0.0
-    
+
     # Use of proceeds breakdown
     capex_amount: float = 0.0
     capex_percent: float = 0.0
@@ -2527,30 +2527,30 @@ class ObjectsOfIssueAnalysis:
     gcp_percent: float = 0.0  # Should be < 25%
     issue_expenses: float = 0.0
     issue_expenses_percent: float = 0.0
-    
+
     # Deployment timeline
     deployment_schedule: List[Dict] = field(default_factory=list)  # [{use, fy26, fy27, fy28}]
     full_deployment_expected_by: Optional[str] = None
-    
+
     # Readiness indicators
     land_acquired_for_capex: bool = False
     approvals_in_place: bool = False
     capex_already_incurred: float = 0.0  # From internal accruals
     orders_placed_for_equipment: bool = False
-    
+
     # Monitoring
     has_monitoring_agency: bool = False
     monitoring_agency_name: Optional[str] = None
-    
+
     # Assessment
     is_growth_oriented: bool = False  # Capex > Debt repayment
     is_exit_oriented: bool = False  # OFS > Fresh issue
     is_deleveraging: bool = False  # Debt repayment dominant
-    
+
     # Red flags
     gcp_exceeds_25_percent: bool = False
     vague_deployment_timeline: bool = False
-    
+
     citations: List[str] = field(default_factory=list)
 
 @dataclass
@@ -2558,44 +2558,44 @@ class StubPeriodAnalysis:
     """Analysis of stub period (interim) financials"""
     stub_period: str  # e.g., "6 months ended Sep 2025"
     comparable_prior_period: str  # e.g., "6 months ended Sep 2024"
-    
+
     # Stub period metrics
     stub_revenue: float = 0.0
     stub_ebitda: float = 0.0
     stub_pat: float = 0.0
     stub_ebitda_margin: float = 0.0
     stub_pat_margin: float = 0.0
-    
+
     # Prior period metrics
     prior_revenue: float = 0.0
     prior_ebitda: float = 0.0
     prior_pat: float = 0.0
     prior_ebitda_margin: float = 0.0
     prior_pat_margin: float = 0.0
-    
+
     # YoY comparison
     revenue_growth_yoy: float = 0.0
     ebitda_growth_yoy: float = 0.0
     pat_growth_yoy: float = 0.0
     margin_expansion: float = 0.0  # Stub EBITDA margin - Prior EBITDA margin
-    
+
     # Annualized run-rate
     annualized_revenue: float = 0.0
     annualized_ebitda: float = 0.0
     annualized_pat: float = 0.0
-    
+
     # vs Full year comparison
     last_full_year_revenue: float = 0.0
     implied_full_year_growth: float = 0.0  # Annualized stub vs last FY
-    
+
     # Seasonality flag
     is_business_seasonal: bool = False
     seasonality_notes: Optional[str] = None
-    
+
     # Warning flags
     stub_growth_below_historical_cagr: bool = False
     margin_compression_in_stub: bool = False
-    
+
     citations: List[str] = field(default_factory=list)
 ```
 
@@ -2710,12 +2710,12 @@ class BaseAgent(ABC):
         self.vector_store = vector_store
         self.citation_mgr = citation_mgr
         self.name = self.__class__.__name__
-        
+
     @abstractmethod
     def analyze(self, state: AnalysisState) -> AgentAnalysis:
         """Perform agent-specific analysis"""
         pass
-        
+
     def retrieve_context(self, query: str, filters: Dict) -> List[Chunk]:
         """Retrieve relevant chunks from vector store"""
         results = self.vector_store.search(
@@ -2724,7 +2724,7 @@ class BaseAgent(ABC):
             top_k=10
         )
         return results
-        
+
     def _embed_query(self, query: str) -> List[float]:
         """Convert query to embedding"""
         embedding_model = SentenceTransformer("nomic-ai/nomic-embed-text-v1.5")
@@ -2792,10 +2792,10 @@ class InvestmentCommitteeAgent(BaseAgent):
     def analyze(self, state: AnalysisState) -> AgentAnalysis:
         # Collect outputs from all other agents
         reports = self._collect_reports(state)
-        
+
         prompt = COMMITTEE_PROMPT.format(analyst_reports=reports)
         analysis = self.llm.analyze(prompt)
-        
+
         return self._create_analysis_output(analysis)
 ```
 
@@ -2888,37 +2888,37 @@ class PromoterDueDiligenceAgent(BaseAgent):
     """
     Comprehensive promoter background analysis
     """
-    def __init__(self, llm: ReasoningLLM, vector_store: VectorStore, 
+    def __init__(self, llm: ReasoningLLM, vector_store: VectorStore,
                  citation_mgr: CitationManager, promoter_extractor: PromoterExtractor):
         super().__init__(llm, vector_store, citation_mgr)
         self.promoter_extractor = promoter_extractor
-        
+
     def analyze(self, state: AnalysisState) -> AgentAnalysis:
         # Extract promoter dossiers
         promoter_dossiers = self.promoter_extractor.extract_promoters(state)
-        
+
         # Store in state
         state['promoter_dossiers'] = promoter_dossiers
-        
+
         # Retrieve additional context
         context = self.retrieve_context(
             query="promoters common pursuits interest benefits litigation directorships",
             filters={}
         )
-        
+
         # Build prompt
         prompt = PROMOTER_DUE_DILIGENCE_PROMPT.format(
             promoter_dossiers=self._format_dossiers(promoter_dossiers),
             context=self._format_context(context)
         )
-        
+
         # Generate analysis
         analysis = self.llm.analyze(prompt, system_prompt="You are a forensic due diligence expert.")
-        
+
         # Extract key findings
         key_findings = self._extract_findings(analysis)
         concerns = self._extract_concerns(analysis)
-        
+
         return AgentAnalysis(
             agent_name="Promoter Due Diligence",
             analysis=analysis,
@@ -2927,7 +2927,7 @@ class PromoterDueDiligenceAgent(BaseAgent):
             confidence=0.9,
             sources=[c.page_num for c in context]
         )
-    
+
     def _format_dossiers(self, dossiers: List[PromoterDossier]) -> str:
         """Format promoter dossiers for LLM"""
         formatted = []
@@ -3045,26 +3045,26 @@ Analyze (with structured data provided):
 1. Weighted Average Cost of Acquisition (WACA):
    - Compare Promoter's WACA vs IPO Price. (Is the multiple >50x? Flag it).
    - Compare Pre-IPO Investors' WACA vs IPO Price.
-   
+
 2. Pre-IPO Investor Exit Analysis:
    Use the PreIPOInvestor data provided:
    - For each PE/VC investor, report: Entry Date, Entry Price, Exit Multiple (at Cap), IRR %
    - Flag any investor earning >50% IRR in <2 years as "Aggressive Pricing"
    - Identify which investors are selling via OFS
-   
+
 3. Offer For Sale (OFS):
    - Who is selling? (Promoters vs PE Funds vs Others)
    - Promoter OFS amount and % of their holding
    - If Promoters are selling >20% of their holding, flag as "Skin in the Game" risk
    - Total OFS as % of issue size
-   
+
 4. Float & Liquidity Analysis:
    Use FloatAnalysis data:
    - Day-1 free float % (should be >10% for adequate liquidity)
    - Day-90 free float % (post anchor unlock)
    - Retail quota % (higher is more retail-friendly)
    - Flag if Day-1 float <5% (very low liquidity risk)
-   
+
 5. Lock-in Expiry Calendar:
    - When does anchor lock-in expire? (90 days)
    - When does pre-IPO investor lock-in expire? (6 months / 1 year)
@@ -3108,46 +3108,46 @@ class CapitalStructureAgent(BaseAgent):
     """
     Analyzes WACA, Pre-IPO rounds, float, and OFS
     """
-    def __init__(self, llm: ReasoningLLM, vector_store: VectorStore, 
-                 citation_mgr: CitationManager, 
+    def __init__(self, llm: ReasoningLLM, vector_store: VectorStore,
+                 citation_mgr: CitationManager,
                  pre_ipo_analyzer: PreIPOInvestorAnalyzer,
                  float_calculator: FloatCalculator):
         super().__init__(llm, vector_store, citation_mgr)
         self.pre_ipo_analyzer = pre_ipo_analyzer
         self.float_calculator = float_calculator
-        
+
     def analyze(self, state: AnalysisState) -> AgentAnalysis:
         # Analyze pre-IPO investors
         ipo_details = state['ipo_details']
         pre_ipo_investors = self.pre_ipo_analyzer.analyze_investors(state, ipo_details)
-        
+
         # Calculate float analysis
         promoter_dossiers = state.get('promoter_dossiers', [])
         float_analysis = self.float_calculator.calculate_float_analysis(
-            ipo_details, 
-            pre_ipo_investors, 
+            ipo_details,
+            pre_ipo_investors,
             promoter_dossiers
         )
-        
+
         # Store in state
         state['pre_ipo_investors'] = pre_ipo_investors
         state['float_analysis'] = float_analysis
-        
+
         # Retrieve relevant sections
         cap_struct_context = self.retrieve_context(
             query="capital structure shareholding pattern weighted average cost of acquisition pre-ipo placement",
             filters={"section": "capital_structure"}
         )
-        
+
         prompt = CAP_STRUCTURE_PROMPT.format(
             pre_ipo_investors=self._format_investors(pre_ipo_investors),
             float_analysis=self._format_float(float_analysis),
             context=self._format_context(cap_struct_context)
         )
         analysis = self.llm.analyze(prompt)
-        
+
         return self._create_analysis_output(analysis)
-    
+
     def _format_investors(self, investors: List[PreIPOInvestor]) -> str:
         """Format pre-IPO investor data for LLM"""
         lines = []
@@ -3161,7 +3161,7 @@ class CapitalStructureAgent(BaseAgent):
 - Lock-in: {inv.lock_in_period} (expires {inv.lock_in_expiry_date})
             """)
         return "\n".join(lines)
-    
+
     def _format_float(self, float_analysis: FloatAnalysis) -> str:
         """Format float analysis for LLM"""
         return f"""
@@ -3173,7 +3173,7 @@ Retail Quota: {float_analysis.retail_quota_percent:.1f}%
 Lock-in Calendar:
 {self._format_lock_in_calendar(float_analysis.lock_in_calendar)}
         """
-    
+
     def _format_lock_in_calendar(self, calendar: List[Dict]) -> str:
         """Format lock-in calendar"""
         lines = []
@@ -3204,13 +3204,13 @@ Analyze (using structured financial data provided):
 1. Revenue Quality: Is revenue sustainable and high-quality?
    - Revenue growth trend (CAGR)
    - Stub period growth vs historical (any slowdown?)
-   
+
 2. Window Dressing Checks (CRITICAL):
    Use WorkingCapitalAnalysis data:
    - Receivable Days trend: Is it worsening?
    - Receivables growth vs Revenue growth: If Receivables growing faster, flag "Channel Stuffing Risk"
    - Inventory Days trend: Is inventory piling up?
-   
+
 3. Cash Flow Quality (CRITICAL):
    Use CashFlowAnalysis data:
    - CFO / EBITDA ratio: Should be >70%. If <50%, flag "Paper Profits"
@@ -3218,22 +3218,22 @@ Analyze (using structured financial data provided):
    - If burning cash: Monthly burn rate and runway months
    - Capex Intensity: Capex / Revenue %
    - Growth Capex vs Maintenance Capex
-   
+
 4. Working Capital Efficiency:
    Compare to sector benchmarks:
    - Cash Conversion Cycle vs Sector Average
    - If CCC is >50% worse than sector, flag as "Working Capital Inefficiency"
-   
+
 5. Margin Analysis: Analyze gross, EBITDA, and net margins over time
    - Is margin expanding or contracting?
    - Stub period margin vs historical
-   
+
 6. Related Party Transactions:
    - RPT as % of Revenue
    - If >20%, flag as "High RPT Risk"
-   
+
 7. Accounting Policies: Look for aggressive or unusual policies
-   
+
 8. One-time Items: Identify non-recurring items
 
 Be extremely thorough and skeptical. Question everything.
@@ -3264,7 +3264,7 @@ class ForensicAccountantAgent(BaseAgent):
     """
     Enhanced forensic analysis with cash flow and working capital deep-dive
     """
-    def __init__(self, llm: ReasoningLLM, vector_store: VectorStore, 
+    def __init__(self, llm: ReasoningLLM, vector_store: VectorStore,
                  citation_mgr: CitationManager,
                  cash_flow_analyzer: EnhancedCashFlowAnalyzer,
                  wc_analyzer: WorkingCapitalAnalyzer,
@@ -3273,29 +3273,29 @@ class ForensicAccountantAgent(BaseAgent):
         self.cash_flow_analyzer = cash_flow_analyzer
         self.wc_analyzer = wc_analyzer
         self.stub_analyzer = stub_analyzer
-        
+
     def analyze(self, state: AnalysisState) -> AgentAnalysis:
         # Get financial data
         financials = state['financial_data']
         ipo_details = state['ipo_details']
         sector = state.get('sector', 'Unknown')
-        
+
         # Run enhanced analysis
         cash_flow_analyses = self.cash_flow_analyzer.analyze_cash_flows(financials, ipo_details)
         wc_analyses = self.wc_analyzer.analyze_working_capital(financials, sector)
         stub_analysis = self.stub_analyzer.analyze_stub_period(state, financials)
-        
+
         # Store in state
         state['cash_flow_analyses'] = cash_flow_analyses
         state['working_capital_analyses'] = wc_analyses
         state['stub_period_analysis'] = stub_analysis
-        
+
         # Retrieve context
         financial_context = self.retrieve_context(
             query="financial statements accounting policies restated results",
             filters={"section": "financial"}
         )
-        
+
         prompt = FORENSIC_PROMPT.format(
             financial_data=self._format_financials(financials),
             cash_flow_analysis=self._format_cash_flow(cash_flow_analyses),
@@ -3303,11 +3303,11 @@ class ForensicAccountantAgent(BaseAgent):
             stub_period_analysis=self._format_stub(stub_analysis),
             context=self._format_context(financial_context)
         )
-        
+
         analysis = self.llm.analyze(prompt, system_prompt="You are a forensic accountant with 20 years of experience.")
-        
+
         return self._create_analysis_output(analysis)
-    
+
     def _format_cash_flow(self, analyses: List[CashFlowAnalysis]) -> str:
         """Format cash flow data"""
         lines = ["## Cash Flow Analysis"]
@@ -3321,7 +3321,7 @@ class ForensicAccountantAgent(BaseAgent):
 - Cash Burning: {'Yes, Runway: ' + str(cf.runway_months) + ' months' if cf.is_cash_burning else 'No'}
             """)
         return "\n".join(lines)
-    
+
     def _format_wc(self, analyses: List[WorkingCapitalAnalysis]) -> str:
         """Format working capital data"""
         lines = ["## Working Capital Analysis"]
@@ -3334,12 +3334,12 @@ class ForensicAccountantAgent(BaseAgent):
 - Receivables vs Revenue Growth: {wc.receivable_growth_vs_revenue_growth:+.1f}% {'⚠️ CHANNEL STUFFING RISK' if wc.receivable_growth_vs_revenue_growth > 10 else '✓'}
             """)
         return "\n".join(lines)
-    
+
     def _format_stub(self, stub: Optional[StubPeriodAnalysis]) -> str:
         """Format stub period data"""
         if not stub:
             return "No stub period disclosed"
-        
+
         return f"""
 ## Stub Period: {stub.stub_period} vs {stub.comparable_prior_period}
 - Revenue Growth YoY: {stub.revenue_growth_yoy:.1f}% {'⚠️ SLOWDOWN' if stub.stub_growth_below_historical_cagr else '✓'}
@@ -3352,7 +3352,7 @@ class ForensicAccountantAgent(BaseAgent):
 #### 7.2.7 Red Flag Agent
         prompt = CAP_STRUCTURE_PROMPT.format(context=self._format_context(cap_struct_context))
         analysis = self.llm.analyze(prompt)
-        
+
         return self._create_analysis_output(analysis)
 ```
 
@@ -3441,30 +3441,30 @@ Analyze (using structured data provided):
    - CFO/EBITDA <50% (paper profits)
    - Receivables growing >20% faster than revenue (channel stuffing)
    - Debt/Equity >2x
-   
+
 3. Litigation Red Flags:
    - Total litigation >10% of net worth
    - Criminal litigation >0
    - Contingent liabilities >15% of net worth
-   
+
 4. Concentration Risk:
    - Top 5 Customers >50% of revenue
    - Single customer >25% of revenue
    - Top 5 suppliers >50% of expenses
-   
+
 5. Liquidity Red Flags:
    - Day-1 free float <5%
    - Pre-IPO investor IRR >60% in <18 months
-   
+
 6. Debt Maturity Red Flags:
    - >50% debt maturing in 12 months
    - Weighted avg interest rate >12%
    - Debt covenants close to breach
-   
+
 7. Working Capital Red Flags:
    - CCC >2x sector average
    - Receivable days >120 (except pharma/capital goods)
-   
+
 8. Use of Proceeds Red Flags:
    - OFS >50% of total issue
    - Debt repayment >60% of fresh issue
@@ -3521,13 +3521,13 @@ class RedFlagAgent(BaseAgent):
         float_analysis = state.get('float_analysis')
         debt_structure = state.get('debt_structure')
         litigation_data = state.get('contingent_liability_analysis')
-        
+
         # Retrieve risk factors section
         risk_context = self.retrieve_context(
             query="risk factors material risks company specific risks",
             filters={"section": "risk_factors"}
         )
-        
+
         prompt = RED_FLAG_PROMPT.format(
             promoter_data=self._format_promoter_risks(promoter_data),
             financial_metrics=self._format_financial_risks(cash_flow, wc_analyses),
@@ -3536,11 +3536,11 @@ class RedFlagAgent(BaseAgent):
             debt_data=self._format_debt_risks(debt_structure),
             context=self._format_context(risk_context)
         )
-        
+
         analysis = self.llm.analyze(prompt)
-        
+
         return self._create_analysis_output(analysis)
-    
+
     def _format_promoter_risks(self, promoters: List[PromoterDossier]) -> str:
         """Format promoter risk metrics"""
         risks = []
@@ -3554,27 +3554,27 @@ class RedFlagAgent(BaseAgent):
 - Post-IPO Holding: {p.shareholding_post_ipo}%
             """)
         return "\n".join(risks)
-    
+
     def _format_financial_risks(self, cf_list, wc_list) -> str:
         """Format financial risk metrics"""
         if not cf_list or not wc_list:
             return "No data"
-        
+
         latest_cf = cf_list[-1]
         latest_wc = wc_list[-1]
-        
+
         return f"""
 - FCF: ₹{latest_cf.fcf} Cr ({'NEGATIVE - Burning Cash' if latest_cf.fcf < 0 else 'Positive'})
 - CFO/EBITDA: {latest_cf.cfo_to_ebitda:.1f}% ({'< 50% - Paper Profits Risk' if latest_cf.cfo_to_ebitda < 50 else 'OK'})
 - Receivables Growth Delta: {latest_wc.receivable_growth_vs_revenue_growth:+.1f}% ({'CHANNEL STUFFING RISK' if latest_wc.receivable_growth_vs_revenue_growth > 20 else 'OK'})
 - CCC: {latest_wc.cash_conversion_cycle:.0f} days (Sector: {latest_wc.sector_avg_ccc or 'N/A'})
         """
-    
+
     def _format_litigation_risks(self, litigation: Optional[ContingentLiabilityAnalysis]) -> str:
         """Format litigation risk metrics"""
         if not litigation:
             return "No litigation data"
-        
+
         return f"""
 - Total Litigation: ₹{litigation.total_contingent_liabilities} Cr ({litigation.total_as_percent_networth:.1f}% of NW)
 - Tax Disputes: ₹{litigation.tax_disputes} Cr ({litigation.tax_disputes_count} cases)
@@ -3582,22 +3582,22 @@ class RedFlagAgent(BaseAgent):
 - Environmental: ₹{litigation.environmental} Cr
 - High Probability Exposure: ₹{litigation.high_probability_exposure} Cr
         """
-    
+
     def _format_float_risks(self, float_analysis: Optional[FloatAnalysis]) -> str:
         """Format float risk metrics"""
         if not float_analysis:
             return "No float data"
-        
+
         return f"""
 - Day-1 Free Float: {float_analysis.day_1_free_float_percent:.1f}% ({'LOW LIQUIDITY' if float_analysis.day_1_free_float_percent < 5 else 'OK'})
 - Retail Quota: {float_analysis.retail_quota_percent:.1f}%
         """
-    
+
     def _format_debt_risks(self, debt: Optional[DebtStructure]) -> str:
         """Format debt risk metrics"""
         if not debt:
             return "No debt data"
-        
+
         return f"""
 - Total Debt: ₹{debt.total_debt} Cr
 - Debt/Equity: {debt.debt_to_equity_pre_ipo:.2f}x
@@ -3706,31 +3706,31 @@ class GovernanceAgent(BaseAgent):
     def analyze(self, state: AnalysisState) -> AgentAnalysis:
         # Get promoter dossiers
         promoter_dossiers = state.get('promoter_dossiers', [])
-        
+
         # Retrieve governance context
         governance_context = self.retrieve_context(
             query="board directors independent audit committee remuneration related party transactions",
             filters={}
         )
-        
+
         # Extract RPT data from financial statements
         rpt_data = self._extract_rpt_data(state)
-        
+
         prompt = GOVERNANCE_PROMPT.format(
             promoter_dossiers=self._format_promoter_dossiers(promoter_dossiers),
             board_data="To be extracted from RHP",
             rpt_data=rpt_data,
             context=self._format_context(governance_context)
         )
-        
+
         analysis = self.llm.analyze(prompt)
-        
+
         # Extract governance score
         governance_score = self._extract_score(analysis)
         state['governance_score'] = governance_score
-        
+
         return self._create_analysis_output(analysis)
-    
+
     def _extract_rpt_data(self, state: AnalysisState) -> str:
         """Extract RPT data from financial statements"""
         # To be implemented
@@ -3761,12 +3761,12 @@ Analyze (using structured ContingentLiabilityAnalysis data):
    - Environmental: High risk for mining/chemicals
    - Regulatory Fines: SEBI, RBI, sector regulators
    - Labor Disputes: Usually manageable
-   
+
 3. Probability-Weighted Exposure:
    - High probability: ₹X Cr (likely to materialize)
    - Medium probability: ₹Y Cr
    - Low probability: ₹Z Cr
-   
+
 4. Timeline Risk:
    - Matters with hearings in next 12 months
    - Amount at risk in near term
@@ -3814,50 +3814,50 @@ class LegalAgent(BaseAgent):
     """
     Enhanced legal analysis with categorized contingent liabilities
     """
-    def __init__(self, llm: ReasoningLLM, vector_store: VectorStore, 
+    def __init__(self, llm: ReasoningLLM, vector_store: VectorStore,
                  citation_mgr: CitationManager,
                  cl_categorizer: ContingentLiabilityCategorizer):
         super().__init__(llm, vector_store, citation_mgr)
         self.cl_categorizer = cl_categorizer
-        
+
     def analyze(self, state: AnalysisState) -> AgentAnalysis:
         # Get net worth for calculations
         financials = state['financial_data']
         latest_financial = financials[-1] if financials else None
         net_worth = latest_financial.total_equity if latest_financial else 0
-        
+
         # Get objects analysis for settlement check
         objects_analysis = state.get('objects_of_issue_analysis')
-        
+
         # Analyze contingent liabilities
         cl_analysis = self.cl_categorizer.analyze_contingent_liabilities(
-            state, 
-            net_worth, 
+            state,
+            net_worth,
             objects_analysis
         )
-        
+
         # Store in state
         state['contingent_liability_analysis'] = cl_analysis
-        
+
         # Get promoter litigation
         promoter_dossiers = state.get('promoter_dossiers', [])
-        
+
         # Retrieve legal context
         legal_context = self.retrieve_context(
             query="litigation outstanding legal proceedings contingent liabilities material contracts",
             filters={}
         )
-        
+
         prompt = LEGAL_PROMPT.format(
             contingent_liability_analysis=self._format_cl_analysis(cl_analysis),
             promoter_litigation=self._format_promoter_litigation(promoter_dossiers),
             context=self._format_context(legal_context)
         )
-        
+
         analysis = self.llm.analyze(prompt)
-        
+
         return self._create_analysis_output(analysis)
-    
+
     def _format_cl_analysis(self, cl: ContingentLiabilityAnalysis) -> str:
         """Format contingent liability data"""
         return f"""
@@ -3881,7 +3881,7 @@ Timeline Risk:
 - {cl.matters_with_hearing_in_12_months} matters with hearings in next 12 months
 - Amount at risk: ₹{cl.amount_at_risk_in_12_months} Cr
         """
-    
+
     def _format_promoter_litigation(self, promoters: List[PromoterDossier]) -> str:
         """Format promoter-specific litigation"""
         lines = []
@@ -3910,7 +3910,7 @@ Analyze (using ObjectsOfIssueAnalysis data):
    - Fresh Issue: ₹X Cr (Y%)
    - Offer for Sale (OFS): ₹A Cr (B%)
    - If OFS >50% of total issue, this is EXIT-ORIENTED (promoters cashing out)
-   
+
 2. Use of Proceeds Breakdown:
    Create a table with % allocation:
    - Capex / Expansion: ₹X Cr (Y%)
@@ -3918,24 +3918,24 @@ Analyze (using ObjectsOfIssueAnalysis data):
    - Working Capital: ₹C Cr (D%)
    - General Corporate Purposes (GCP): ₹E Cr (F%)
    - Issue Expenses: ₹G Cr (H%)
-   
+
 3. Red Flags:
    - GCP >25%: Vague use, lack of clarity
    - Debt Repayment >60%: Balance sheet repair, not growth
    - OFS > Fresh Issue: Promoter exit
-   
+
 4. Deployment Timeline (if disclosed):
    - FY-wise deployment schedule
    - Expected completion date
    - If vague/missing, flag as "Execution Risk"
-   
+
 5. Readiness Indicators:
    - Land acquired for capex? (Yes/No)
    - Regulatory approvals in place? (Yes/No)
    - Capex already incurred from internal accruals: ₹X Cr
    - Equipment orders placed? (Yes/No)
    - If all "No", flag as "Greenfield Risk - Execution Uncertain"
-   
+
 6. Debt Repayment Context:
    Use DebtStructure data:
    - Pre-IPO Debt: ₹X Cr (Debt/Equity: A.B)
@@ -3943,7 +3943,7 @@ Analyze (using ObjectsOfIssueAnalysis data):
    - Post-IPO Debt: ₹Z Cr (Debt/Equity: C.D)
    - Interest rate: E%
    - If repaying high-cost debt (>12%), it's value-accretive
-   
+
 7. Monitoring Agency:
    - Appointed? (Mandatory for >₹100 Cr fresh issue)
    - If not appointed and issue >₹100 Cr, flag as governance lapse
@@ -3984,44 +3984,44 @@ class UtilizationAgent(BaseAgent):
     """
     Enhanced use of proceeds analysis with deployment tracking
     """
-    def __init__(self, llm: ReasoningLLM, vector_store: VectorStore, 
+    def __init__(self, llm: ReasoningLLM, vector_store: VectorStore,
                  citation_mgr: CitationManager,
                  objects_tracker: ObjectsOfIssueTracker,
                  debt_analyzer: DebtStructureAnalyzer):
         super().__init__(llm, vector_store, citation_mgr)
         self.objects_tracker = objects_tracker
         self.debt_analyzer = debt_analyzer
-        
+
     def analyze(self, state: AnalysisState) -> AgentAnalysis:
         # Get IPO details
         ipo_details = state['ipo_details']
-        
+
         # Analyze objects of issue
         objects_analysis = self.objects_tracker.analyze_objects(state, ipo_details)
-        
+
         # Analyze debt structure
         debt_structure = self.debt_analyzer.analyze_debt(state, objects_analysis)
-        
+
         # Store in state
         state['objects_of_issue_analysis'] = objects_analysis
         state['debt_structure'] = debt_structure
-        
+
         # Retrieve context
         objects_context = self.retrieve_context(
             query="objects of the issue use of proceeds deployment schedule monitoring agency",
             filters={}
         )
-        
+
         prompt = UTILIZATION_PROMPT.format(
             objects_analysis=self._format_objects(objects_analysis),
             debt_structure=self._format_debt(debt_structure),
             context=self._format_context(objects_context)
         )
-        
+
         analysis = self.llm.analyze(prompt)
-        
+
         return self._create_analysis_output(analysis)
-    
+
     def _format_objects(self, obj: ObjectsOfIssueAnalysis) -> str:
         """Format objects of issue data"""
         return f"""
@@ -4055,7 +4055,7 @@ Assessment:
 - Exit-Oriented: {'Yes ⚠️' if obj.is_exit_oriented else 'No'}
 - Deleveraging: {'Yes' if obj.is_deleveraging else 'No'}
         """
-    
+
     def _format_debt(self, debt: DebtStructure) -> str:
         """Format debt structure data"""
         return f"""
@@ -4281,26 +4281,26 @@ class QAAgent(BaseAgent):
             filters={},
             top_k=5
         )
-        
+
         # Build prompt
         context = "\n\n".join([
             f"[Page {chunk.page_num}] {chunk.text}"
             for chunk in context_chunks
         ])
-        
+
         prompt = f"""
         Based on the following excerpts from the RHP, answer the question.
         Cite specific page numbers for your answer.
         If the answer cannot be found, say "Insufficient evidence in the document."
-        
+
         Question: {question}
-        
+
         Context:
         {context}
-        
+
         Answer:
         """
-        
+
         answer = self.llm.generate(prompt)
         return answer
 ```
@@ -4317,28 +4317,28 @@ class QAAgent(BaseAgent):
 1. **PDF Load** (1-2 min)
    - Validate PDF integrity
    - Extract metadata (page count, file size)
-   
+
 2. **Text Extraction** (5-8 min)
    - Parse all pages with PyMuPDF
    - Identify scanned pages
    - Apply OCR if needed
-   
+
 3. **Table Extraction** (5-7 min)
    - Run unstructured.io detection
    - Extract tables with pdfplumber
    - Classify table types
    - Parse financial statements
-   
+
 4. **Section Mapping** (2-3 min)
    - Analyze document structure
    - Build section hierarchy
    - Extract section boundaries
-   
+
 5. **Entity Extraction** (3-5 min)
    - Run NER on full document
    - Extract companies, people, locations
    - Resolve coreferences
-   
+
 6. **Financial Parsing** (2-3 min)
    - Extract financial metrics from tables
    - Calculate ratios
@@ -4357,7 +4357,7 @@ class QAAgent(BaseAgent):
    - Split text into 500-1500 token chunks
    - Respect section boundaries
    - Add metadata (section, page, type)
-   
+
 2. **Embedding Generation** (5-8 min)
    - Generate embeddings for all chunks
    - Batch processing (32 chunks at a time)
@@ -4411,27 +4411,27 @@ class QAAgent(BaseAgent):
    - Deep dive into financial statements
    - Analyzes accounting quality
    - Identifies financial red flags
-   
+
 6. **Red Flag Agent** (5-7 min)
    - Scans for warning signs
    - Categorizes risks
    - Assigns severity levels
-   
+
 7. **Governance Agent** (5-7 min)
    - Assesses board composition
    - Evaluates promoter background
    - Reviews related party transactions
-   
+
 8. **Legal Agent** (5-7 min)
    - Reviews legal proceedings
    - Assesses regulatory compliance
    - Identifies contingent liabilities
-   
+
 9. **Valuation Agent** (5-7 min)
    - Compares P/E, P/B with peers
    - Calculates PEG ratio
    - Assesses pricing fairness
-   
+
 10. **Utilization Agent** (3-5 min)
    - Analyzes Objects of the Issue
    - Checks Fresh Issue vs OFS split
@@ -4454,7 +4454,7 @@ class QAAgent(BaseAgent):
    - Check page references
    - Identify contradictions
    - Flag hallucinations
-   
+
 2. **Consensus Building**
    - Reconcile agent findings
    - Prioritize key insights
@@ -4472,12 +4472,12 @@ class QAAgent(BaseAgent):
    - Combine agent outputs
    - Structure report sections
    - Add executive summary
-   
+
 2. **Markdown Generation**
    - Apply report template
    - Format tables and lists
    - Add table of contents
-   
+
 3. **PDF Conversion** (optional)
    - Convert markdown to HTML
    - Generate styled PDF with WeasyPrint
@@ -4512,17 +4512,17 @@ class QAAgent(BaseAgent):
    - Text extraction (PyMuPDF)
    - Basic table extraction
    - Section detection
-   
+
 2. Simple chunking and embedding
    - Fixed-size chunks
    - Basic embedding generation
    - In-memory storage (no vector DB yet)
-   
+
 3. Single agent (Architect)
    - Basic LLM integration
    - Simple prompt template
    - RAG-based analysis
-   
+
 4. Basic markdown report
    - Template-based generation
    - Section summaries
@@ -4549,17 +4549,17 @@ class QAAgent(BaseAgent):
    - Set up Qdrant
    - Implement semantic search
    - Add metadata filtering
-   
+
 2. Multi-agent system
    - Implement 5 core agents
    - LangGraph orchestration
    - State management
-   
+
 3. Enhanced table extraction
    - Financial statement parsing
    - Ratio calculations
    - Trend analysis
-   
+
 4. Improved reporting
    - Layered outputs (TL;DR, detailed)
    - Better formatting
@@ -4585,21 +4585,21 @@ class QAAgent(BaseAgent):
    - Validation logic
    - Error detection
    - Confidence scoring
-   
+
 2. CLI interface
    - Easy invocation
    - Progress tracking
    - Error handling
-   
+
 3. PDF report generation
    - Styled PDF output
    - Professional formatting
-   
+
 4. Error handling and logging
    - Comprehensive error catching
    - Detailed logs
    - Recovery mechanisms
-   
+
 5. Testing suite
    - Unit tests
    - Integration tests
@@ -4622,15 +4622,15 @@ class QAAgent(BaseAgent):
 1. Interactive Q&A
    - Command-line query interface
    - Real-time answers
-   
+
 2. Comparative analysis
    - Compare multiple IPOs
    - Industry benchmarking
-   
+
 3. Local LLM integration
    - Reduce API costs
    - Faster processing
-   
+
 4. Web interface
    - Simple Flask/FastAPI app
    - Upload and analyze
@@ -4690,15 +4690,15 @@ def test_end_to_end_workflow():
     """Test complete workflow"""
     workflow = RHPAnalysisWorkflow()
     result = workflow.run("test_data/sample_rhp.pdf")
-    
+
     # Check all phases completed
     assert result['current_phase'] == 'completed'
     assert result['final_report'] is not None
-    
+
     # Check agent outputs
     assert result['architect_analysis'] is not None
     assert result['forensic_analysis'] is not None
-    
+
     # Check report file generated
     import os
     assert os.path.exists(f"outputs/{result['document_id']}/report.md")
@@ -4808,7 +4808,7 @@ def rate_limit(calls_per_minute: int = 60):
     """Decorator to rate limit API calls"""
     min_interval = 60.0 / calls_per_minute
     last_called = [0.0]
-    
+
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
@@ -4860,7 +4860,7 @@ class RobustProcessor:
             # Primary processing
             result = self.primary_processing(pdf_path)
             return result
-            
+
         except PDFProcessingError as e:
             logger.warning(f"Primary processing failed: {e}")
             try:
@@ -4870,7 +4870,7 @@ class RobustProcessor:
             except Exception as fallback_error:
                 logger.error(f"Fallback also failed: {fallback_error}")
                 return None
-                
+
         except Exception as e:
             logger.exception(f"Unexpected error: {e}")
             return None
@@ -4954,7 +4954,7 @@ class ProgressTracker:
                 logger.info(f"Starting phase: {phase}")
                 self.execute_phase(phase)
                 pbar.update(1)
-                
+
     def track_page_processing(self, total_pages: int):
         for page_num in tqdm(range(total_pages), desc="Processing pages"):
             self.process_page(page_num)
@@ -5197,15 +5197,15 @@ agents:
     - governance
     - legal
     - self_critic
-  
+
   architect:
     temperature: 0.3
     max_tokens: 4096
-  
+
   forensic:
     temperature: 0.2
     max_tokens: 4096
-  
+
   # ... more agent configs
 
 # Report configuration
@@ -5220,7 +5220,7 @@ report:
     - governance
     - legal_review
     - red_flags
-  
+
   tldr_length: 250  # words
   detail_level: "comprehensive"  # or "concise"
 
